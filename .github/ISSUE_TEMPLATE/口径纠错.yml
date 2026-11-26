@@ -1,0 +1,46 @@
+name: 口径纠错
+description: 指出正文里转述错误、版本号过时或结论被证伪的地方
+title: "[纠错] <章节> / <一句话>"
+labels: ["correction"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        这份笔记是二手材料拼的，作者没有 Mac。转述错的地方直接指出，附一手链接最好。
+
+  - type: input
+    id: where
+    attributes:
+      label: 位置
+      placeholder: 正文「版本口径」第三段 / 附录 A 的 4.0 行
+    validations:
+      required: true
+
+  - type: textarea
+    id: wrong
+    attributes:
+      label: 现在写的是什么
+      value: |
+        > （引用原文）
+    validations:
+      required: true
+
+  - type: textarea
+    id: correct
+    attributes:
+      label: 应该是什么
+      description: 附一手材料链接（MR、commit、文档、日志）
+    validations:
+      required: true
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: 影响范围
+      options:
+        - 只影响措辞
+        - 影响某条能力结论
+        - 影响构建 A/B/C 的口径
+        - 影响「这条路是否成立」的判断
+    validations:
+      required: true

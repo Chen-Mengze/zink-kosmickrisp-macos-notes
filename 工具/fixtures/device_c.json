@@ -1,0 +1,42 @@
+{
+  "_comment": "构建 C：main + Hadron 0038-0083 一类补丁。GS 与 XFB 都有，报 GL 4.6。不能拿去代表 A 或 B。",
+  "capabilities": {
+    "device": {
+      "properties": {
+        "deviceName": "Apple M2 Pro",
+        "driverName": "KosmicKrisp",
+        "driverInfo": "Mesa 26.4.0-devel + patches",
+        "apiVersion": "1.4.363"
+      },
+      "features": {
+        "geometryShader": true,
+        "depthClamp": true,
+        "tessellationShader": true,
+        "shaderTessellationAndGeometryPointSize": true,
+        "dualSrcBlend": true,
+        "shaderFloat64": true,
+        "imageCubeArray": true,
+        "multiViewport": true,
+        "shaderDrawParameters": true,
+        "vertexPipelineStoresAndAtomics": true,
+        "fragmentStoresAndAtomics": true,
+        "shaderStorageImageExtendedFormats": true,
+        "robustBufferAccess": true,
+        "shaderCullDistance": true,
+        "samplerAnisotropy": true,
+        "depthBiasClamp": true,
+        "robustness2": { "nullDescriptor": true }
+      },
+      "extensions": {
+        "VK_KHR_swapchain": 70,
+        "VK_EXT_conditional_rendering": 1,
+        "VK_EXT_custom_border_color": 1,
+        "VK_EXT_provoking_vertex": 1,
+        "VK_KHR_dynamic_rendering": 1,
+        "VK_KHR_maintenance5": 1,
+        "VK_KHR_draw_indirect_count": 1,
+        "VK_EXT_transform_feedback": 1
+      }
+    }
+  }
+}

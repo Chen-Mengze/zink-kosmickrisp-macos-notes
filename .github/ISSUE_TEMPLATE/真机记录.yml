@@ -1,0 +1,111 @@
+name: 真机记录
+description: 提交一份 KosmicKrisp + Zink 的真机能力记录（10 分钟或 40 分钟两档都收）
+title: "[记录] <芯片> / macOS <版本> / 构建 <A|B|C>"
+labels: ["data"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前先看 `行动/02_真机测试协议.md`。10 分钟档只需要 SDK 和 `-Dtools=zink`，不用编 KK。
+        **确认 `driverName` 是 `KosmicKrisp`**：是 `Apple` 就说明静默降级了，这条记录无效。
+
+  - type: input
+    id: chip
+    attributes:
+      label: 芯片
+      placeholder: Apple M1 Pro
+    validations:
+      required: true
+
+  - type: input
+    id: macos
+    attributes:
+      label: macOS 版本
+      placeholder: "26.2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: build
+    attributes:
+      label: 构建
+      description: A = SDK，B = main + 14f59d06，C = main + 第三方补丁
+      options:
+        - A（LunarG SDK / Mesa 26.3.x）
+        - B（Mesa main，含 14f59d06）
+        - C（main + Hadron 类补丁）
+        - 不清楚
+    validations:
+      required: true
+
+  - type: input
+    id: commit
+    attributes:
+      label: base commit / MR head
+      placeholder: 14f59d06 / !44928 head abc1234
+    validations:
+      required: true
+
+  - type: input
+    id: gl
+    attributes:
+      label: Zink 报的 GL 版本
+      description: 来自 zink_check_requirements 或 glxinfo，不要用 MESA_GL_VERSION_OVERRIDE
+      placeholder: "3.2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: xfb
+    attributes:
+      label: VK_EXT_transform_feedback
+      options:
+        - present
+        - absent
+        - 没查
+    validations:
+      required: true
+
+  - type: dropdown
+    id: gs
+    attributes:
+      label: geometryShader
+      options:
+        - present
+        - absent
+        - 没查
+    validations:
+      required: true
+
+  - type: textarea
+    id: samples
+    attributes:
+      label: 四列结果
+      description: 编译通过 / 出画面 / 渲染正确 / 报错类型
+      value: |
+        | 样本 | 编译 | 出画面 | 正确 | 报错 |
+        |---|---|---|---|---|
+        |  |  |  |  |  |
+    validations:
+      required: false
+
+  - type: textarea
+    id: artifacts
+    attributes:
+      label: 附件
+      description: 把 kk.json、requirements 输出、F3 截图拖进来
+      placeholder: 直接拖文件到这里
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 已确认 driverName 是 KosmicKrisp（不是 Apple）
+          required: true
+        - label: 已删除日志里的用户名与绝对路径
+          required: true
+        - label: 没有使用 MESA_GL_VERSION_OVERRIDE 的结果冒充能力
+          required: true

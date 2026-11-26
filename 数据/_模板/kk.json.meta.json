@@ -1,0 +1,25 @@
+{
+  "chip": "<Apple M1 Pro>",
+  "macos": "<26.2>",
+  "build": "<A (SDK 1.4.363.1) | B (main + 14f59d06) | C (main + patches)>",
+  "commit": "<mesa base commit>",
+  "mr": "<!44928 head sha，若适用>",
+  "date": "<YYYY-MM-DD>",
+  "tester": "<可留空>",
+  "gl": "<3.1>",
+  "gl_source": "<zink_check_requirements | MESA_GL_VERSION_OVERRIDE | 目测>",
+  "samples": [
+    {
+      "name": "<pack 名 + 版本>",
+      "compiles": false,
+      "draws": false,
+      "correct": false,
+      "error": "<第一条错误原文>"
+    }
+  ],
+  "perf": {
+    "baseline": "<Apple GL 4.1：平均帧 / 1% low>",
+    "zink_kk": "<平均帧 / 1% low / 尖峰次数>"
+  },
+  "notes": "<一句话>"
+}

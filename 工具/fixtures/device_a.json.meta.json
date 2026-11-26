@@ -1,0 +1,7 @@
+{
+  "chip": "Apple M6 (iGPU)",
+  "macos": "26.3",
+  "build": "A (SDK 1.4.363.1 / Mesa 26.3.1)",
+  "gl": "3.1",
+  "source": "社区 F3 截图（Glavo 提供），非本机实测"
+}

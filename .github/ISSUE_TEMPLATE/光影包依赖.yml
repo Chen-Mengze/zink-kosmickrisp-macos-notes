@@ -1,0 +1,56 @@
+name: 光影包 GS 依赖
+description: 说明某个光影包对 geometryShader 是硬依赖还是软依赖
+title: "[pack] <pack 名> / <硬依赖|软依赖|不确定>"
+labels: ["shaderpack"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        先跑一次 `python 工具/packscan.py <pack 路径>`，把输出贴进来。它给的是初判，最终以作者说明为准。
+
+  - type: input
+    id: pack
+    attributes:
+      label: pack 名称与版本
+      placeholder: Complementary Reimagined r5.5
+    validations:
+      required: true
+
+  - type: dropdown
+    id: dep
+    attributes:
+      label: 依赖类型
+      options:
+        - 硬依赖（存在独立 geometry stage，缺 GS 直接编译失败）
+        - 软依赖（GS 只在高级特效里用，有替代分支）
+        - 不确定
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 证据
+      description: packscan 输出，或 shader 文件里的具体行
+      value: |
+        ```
+        （贴 packscan 输出）
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: fallback
+    attributes:
+      label: 有没有替代路径
+      description: 关掉某个特效 / 改某个宏之后能不能在 GL 4.1 上跑
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: 需要的 GL 版本 / 其它硬需求
+      placeholder: GL 4.3（compute）/ GL 4.5
+    validations:
+      required: false

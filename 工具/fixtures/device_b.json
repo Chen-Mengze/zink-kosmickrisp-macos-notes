@@ -1,0 +1,41 @@
+{
+  "_comment": "构建 B：Mesa main 含 14f59d06。GS 有，XFB 没有。这一档目前零公开数据。",
+  "capabilities": {
+    "device": {
+      "properties": {
+        "deviceName": "Apple M1 Pro",
+        "driverName": "KosmicKrisp",
+        "driverInfo": "Mesa 26.4.0-devel (14f59d06)",
+        "apiVersion": "1.4.363"
+      },
+      "features": {
+        "geometryShader": true,
+        "depthClamp": true,
+        "tessellationShader": true,
+        "shaderTessellationAndGeometryPointSize": true,
+        "dualSrcBlend": true,
+        "shaderFloat64": false,
+        "imageCubeArray": true,
+        "multiViewport": true,
+        "shaderDrawParameters": true,
+        "vertexPipelineStoresAndAtomics": true,
+        "fragmentStoresAndAtomics": true,
+        "shaderStorageImageExtendedFormats": true,
+        "robustBufferAccess": true,
+        "shaderCullDistance": true,
+        "samplerAnisotropy": true,
+        "depthBiasClamp": true,
+        "robustness2": { "nullDescriptor": true }
+      },
+      "extensions": {
+        "VK_KHR_swapchain": 70,
+        "VK_EXT_conditional_rendering": 1,
+        "VK_EXT_custom_border_color": 1,
+        "VK_EXT_provoking_vertex": 1,
+        "VK_KHR_dynamic_rendering": 1,
+        "VK_KHR_maintenance5": 1,
+        "VK_KHR_draw_indirect_count": 1
+      }
+    }
+  }
+}

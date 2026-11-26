@@ -1,5 +1,8 @@
 # 在 macOS 上用 Zink + KosmicKrisp 跑桌面 OpenGL
 
+> **现在最缺的一份数据**：M1/M2 + macOS 26 上，`main + !44928` 的 `vulkaninfo` 与 Zink 能力差集。
+> 10 分钟版本（不用编 KK）见 [行动/02_真机测试协议.md](行动/02_真机测试协议.md)；整体状态见 [跟进.md](跟进.md)，目录见 [索引.md](索引.md)。
+
 **工程笔记 · 中英双语 · 2026-11-26**
 
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)

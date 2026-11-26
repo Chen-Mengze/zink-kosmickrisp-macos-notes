@@ -1,0 +1,7 @@
+{
+  "chip": "Apple M2 Pro",
+  "macos": "27",
+  "build": "C (main + Hadron 0038-0083 类补丁)",
+  "gl": "4.6",
+  "source": "fixture，仅用于演示；不代表 A/B"
+}

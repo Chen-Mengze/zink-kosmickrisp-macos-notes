@@ -1,0 +1,41 @@
+{
+  "_comment": "构建 A：LunarG SDK 1.4.363.x / Mesa 26.3.1。GS 与 XFB 都没有。这是社区 F3 截图能对上的那一档。",
+  "capabilities": {
+    "device": {
+      "properties": {
+        "deviceName": "Apple M6 (iGPU)",
+        "driverName": "KosmicKrisp",
+        "driverInfo": "Mesa 26.3.1",
+        "apiVersion": "1.4.363"
+      },
+      "features": {
+        "geometryShader": false,
+        "depthClamp": true,
+        "tessellationShader": true,
+        "shaderTessellationAndGeometryPointSize": false,
+        "dualSrcBlend": true,
+        "shaderFloat64": false,
+        "imageCubeArray": true,
+        "multiViewport": true,
+        "shaderDrawParameters": true,
+        "vertexPipelineStoresAndAtomics": true,
+        "fragmentStoresAndAtomics": true,
+        "shaderStorageImageExtendedFormats": true,
+        "robustBufferAccess": true,
+        "shaderCullDistance": true,
+        "samplerAnisotropy": true,
+        "depthBiasClamp": true,
+        "robustness2": { "nullDescriptor": true }
+      },
+      "extensions": {
+        "VK_KHR_swapchain": 70,
+        "VK_EXT_conditional_rendering": 1,
+        "VK_EXT_custom_border_color": 1,
+        "VK_EXT_provoking_vertex": 1,
+        "VK_KHR_dynamic_rendering": 1,
+        "VK_KHR_maintenance5": 1,
+        "VK_KHR_draw_indirect_count": 1
+      }
+    }
+  }
+}
