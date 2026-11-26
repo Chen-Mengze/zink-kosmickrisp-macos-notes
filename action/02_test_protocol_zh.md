@@ -2,7 +2,7 @@
 
 目标只有一个：**在 Mesa main + !44928 上，Zink 到底能报到 GL 几？卡在哪一项？**
 
-40 分钟，不需要图形开发经验，会复制命令就行。
+完整档约 1–2 小时（首次编 KK 偏上限），不需要图形开发经验，会复制命令就行。
 核心步骤**不需要启动任何游戏或应用**——`zink_check_requirements` 直接问当前 Vulkan 设备，逐档打 `Supported` / `UNSUPPORTED`，最高档就是 GL 天花板。跑应用是可选项。
 
 ---
@@ -11,7 +11,7 @@
 
 - Apple Silicon（M1–M6），macOS 26 或 27
 - Xcode + Command Line Tools
-- 磁盘 ≥ 15 GB，编译约 15–25 分钟
+- 磁盘 ≥ 15 GB；首次编 KK + Zink 约 1–2 小时（M1 冷构建偏上限，M4/M5 快一些）
 - 已装 LunarG Vulkan SDK（要里面的 `vulkaninfo`，以及静态 `spirv-tools`）
 - 网络能访问 `gitlab.freedesktop.org`
 
@@ -19,7 +19,7 @@
 
 ---
 
-## 0.5 先测构建 A（10 分钟，只编工具，不编 KK）
+## 0.5 先测构建 A（检查 10 分钟；从零编工具 20–40 分钟）
 
 在动 KK 之前，先用**现成的 SDK 版本**跑一次检查工具，确认 A 的天花板。预期是 2.1，不是 3.1：
 
@@ -37,7 +37,7 @@ ninja -C build-tools
 
 它会把 `VP_ZINK_*` profile 逐个打 `Supported` / `UNSUPPORTED`：预期 `gl21` Supported、`gl30` UNSUPPORTED。它不打印版本号，也不打印缺项；最高 Supported 的那档就是天花板。
 
-如果 `gl30` 也 Supported，说明 SDK 里的 KK 已经有 XFB，能力表要改。这一步不需要编 KK，**先做它，再决定要不要花 25 分钟编 B+。**
+如果 `gl30` 也 Supported，说明 SDK 里的 KK 已经有 XFB，能力表要改。这一步不需要编 KK，**先做它，再决定要不要花 1–2 小时编 B+。**
 
 ---
 

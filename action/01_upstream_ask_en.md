@@ -1,4 +1,4 @@
-# About 40 minutes of M-series time: does !44928 close the last gap?
+# About 1–2 hours on an M-series Mac: does !44928 close the last gap?
 
 **Where this stands.** `geometryShader` landed in `14f59d06` (!44786). `VK_EXT_transform_feedback` is still unmerged (!44928, open, head `e56f2e43`). Zink requires XFB at 3.0 and GS at 3.2, so a GS-only build is still GL 2.1; with both, the MR author reports 3.3.
 
@@ -8,9 +8,9 @@ The user-facing path is wired too: HMCL already ships a conditional KosmicKrisp 
 
 **What is missing is one measurement, not more design.** Nobody has published, on the same machine: main + !44928, `vulkaninfo --json`, the per-tier Zink result, and the resulting GL version. Every claim currently circulating ("GL 4.6 on KK") is either a patched tree, an override, or an unverified report.
 
-There is also a number in circulation that needs correcting: a stock SDK build (Mesa 26.3.0-devel / Homebrew 26.3.1, no XFB) has been described as reporting GL 3.1. It can't — Zink's GL 3.0 tier requires `VK_EXT_transform_feedback`, and !44928's own description says it takes Zink on kk "from OpenGL 2.1 to 3.3". So A and B are 2.1. One `zink_check_requirements` run confirms it in ten minutes: expect `VP_ZINK_gl21_baseline` Supported and `VP_ZINK_gl30_baseline` UNSUPPORTED.
+There is also a number in circulation that needs correcting: a stock SDK build (Mesa 26.3.0-devel / Homebrew 26.3.1, no XFB) has been described as reporting GL 3.1. It can't — Zink's GL 3.0 tier requires `VK_EXT_transform_feedback`, and !44928's own description says it takes Zink on kk "from OpenGL 2.1 to 3.3". So A and B are 2.1. One `zink_check_requirements` run confirms it in ten minutes once the checker is built: expect `VP_ZINK_gl21_baseline` Supported and `VP_ZINK_gl30_baseline` UNSUPPORTED.
 
-**The ask — about 40 minutes, any M1–M6 on macOS 26 or 27:**
+**The ask — about 1–2 hours, any M1–M6 on macOS 26 or 27** (a cold build on an M1 is closer to two hours; a warm tree is faster):
 
 1. `git fetch origin refs/merge-requests/44928/head:mr44928 && git checkout -b kk-xfb mr44928`
 2. Build KK: `meson setup build-kk . -Dplatforms=macos -Dvulkan-drivers=kosmickrisp -Dgallium-drivers= -Dopengl=false -Dzstd=disabled --prefer-static && ninja -C build-kk`

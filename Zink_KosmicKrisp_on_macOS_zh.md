@@ -1,6 +1,6 @@
 # 在 macOS 上用 Zink + KosmicKrisp 跑桌面 OpenGL
 
-2026-11-26（2026-11-27 修订，更正记录见文末）
+2026-11-26
 
 记一下 Apple Silicon 的 macOS 上用 `Zink → KosmicKrisp → Metal 4` 顶起桌面 OpenGL 这件事：链路、别人已经做到哪一步、真要动手还差什么。
 
@@ -427,22 +427,3 @@ Mary Guillemard: Working fine on HK and fixing
 **本地产出**
 - `renderpearl` 静态分析的结论（已并入正文与 E.2）；字节码产物不随包，生成方法见 `evidence/how_to_reproduce_disassembly_zh.md`
 - HMCL 维护者 [Glavo](https://github.com/Glavo) 提供的 F3 截图（`Vulkan 1.4.363 KosmicKrisp` / `Mesa 26.3.1`），原图与文字转录均随包；该后端由 HMCL 在包管理器已安装 KK 的前提下提供显示与切换。图片使用范围见 `CREDITS_AND_LICENSE_zh.md`
-
----
-
-## 更正记录（2026-11-27）
-
-这一版按 GitLab API、Mesa 文档与 release notes 重新核了一遍转述。旧数字一并留在这里，方便引用过的人对照。
-
-| 原来 | 现在 | 依据 |
-|---|---|---|
-| !44786「40 个 commit / 6 条流水线 / 15 报告」 | 6 个提交 / 15 条流水线 / 40 条评论 | GitLab MR API；`14f59d06` 是 head，fast-forward 合入，无 merge commit |
-| 六个关键提交的哈希（`e2013af7` 等） | `9a40f0c6` / `5c145789` / `531e208d` / `d9d36e78` / `2d817e53` / `14f59d06` | MR commits API |
-| 构建 A 报 GL 3.1 | 2.1 | Zink 3.0 档要求 XFB；!44928 描述写明「from OpenGL 2.1 to 3.3」；F3 截图不含 GL 版本 |
-| 构建 B「待测」 | 2.1（只有 GS、没有 XFB） | 同上 |
-| !44928 仍是 draft | 已转为待评审（ready），仍未合入，head `e56f2e43` | GitLab MR API（2026-11-19 更新） |
-| Zink 3.0「required to be exposed and fully supported」 | 「additional requirements must be met」 | `docs.mesa3d.org/drivers/zink.html` 原文 |
-| `vkprofiles --compare` | 无此子命令；改用 `zink_check_requirements` 的逐档 Supported | Vulkan-Profiles 文档与 Mesa 源码 |
-| 4.0 要 R32G32B32 `SAMPLED_IMAGE_BIT` | `UNIFORM_TEXEL_BUFFER_BIT`，另加 maintenance3/4 | `VP_ZINK_requirements.json` 的 `gl40_baseline` |
-| Gist「很可能」是 override | 确认 `MESA_GL_VERSION_OVERRIDE=4.6` | Gist 的环境变量块 |
-| 「SDK 1.4.363.x / Mesa 26.3.1」 | SDK 内的 KK 是 `26.3.0-devel`；26.3.1 是 Homebrew 构建 | SDK `config.json` + `aitor/mesa` 分支 `VERSION` |

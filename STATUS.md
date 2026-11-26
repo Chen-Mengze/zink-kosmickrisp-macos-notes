@@ -15,13 +15,13 @@
 | B+ | main + `14f59d06` + !44928 | ✓ | ✓ | 3.3（作者口径） | !44928 描述：“from OpenGL 2.1 to 3.3 (ES 3.1)”；待实机复核 |
 | C | main + Hadron 0038–0083 | ✓ | ✓ | 4.6 | Hadron findings + CTS 15,304 pass / 1 fail |
 
-之前表里 A 写 3.1，是转述时加上去的：那张 F3 截图只有 `Vulkan 1.4.363` / `Mesa 26.3.1`，没有 GL 版本。按 Zink 3.0 档的要求，没有 `VK_EXT_transform_feedback` 连 3.0 都过不去，所以 A 和 B 都停在 2.1；!44928 作者自己写的也是「加上它才从 2.1 到 3.3」。这条更正同时说明：只带 GS 的包不会抬高版本号。
+口径说明：那张 F3 截图只有 `Vulkan 1.4.363` / `Mesa 26.3.1`，没有 GL 版本。Zink 3.0 档要求 `VK_EXT_transform_feedback`，没有它连 3.0 都过不去，所以 A 和 B 都停在 2.1；!44928 作者写的也是「加上它才从 2.1 到 3.3」。只带 GS 的包不会抬高版本号。
 
 ## 待办（按顺序，每条都有判据）
 
-1. **10 分钟复核构建 A** — 不需要编 KK，只编 `-Dtools=zink`，用现成 SDK 的 KK 跑 `zink_check_requirements`。
+1. **10 分钟复核构建 A**（工具已编好；从零编 `-Dtools=zink` 另加 20–40 分钟）— 不需要编 KK，用现成 SDK 的 KK 跑 `zink_check_requirements`。
    判据：`VP_ZINK_gl21_baseline` Supported、`VP_ZINK_gl30_baseline` UNSUPPORTED。若 3.0 也 Supported，说明 SDK 里已经有 XFB，能力表要改。
-2. **40 分钟测构建 B+** — 叠 !44928（head `e56f2e43`），出 `vulkaninfo --json` 和逐档结果。
+2. **1–2 小时测构建 B+** — 叠 !44928（head `e56f2e43`），出 `vulkaninfo --json` 和逐档结果。
    判据：GL 能不能到 3.3；不能的话缺哪一项。B（只有 GS、没有 XFB）预期仍是 2.1。
 3. **光影包定性** — 用 `tools/packscan.py` 扫目标 pack，得到 HARD / SOFT / NONE。
    判据：至少两个 SSPT/体素类 pack + 一个真 GS 负载，硬依赖占比是多少。

@@ -1,9 +1,9 @@
 # 在 macOS 上用 Zink + KosmicKrisp 跑桌面 OpenGL
 
 > **现在最缺的一份数据**：M1/M2 + macOS 26 上，`main + !44928` 的 `vulkaninfo` 与 Zink 能力差集。
-> 10 分钟版本（不用编 KK）见 [action/02_test_protocol_zh.md](action/02_test_protocol_zh.md)；整体状态见 [STATUS.md](STATUS.md)，目录见 [INDEX.md](INDEX.md)。
+> 轻量版（不编 KK；检查 10 分钟，首次编工具 20–40 分钟）见 [action/02_test_protocol_zh.md](action/02_test_protocol_zh.md)；整体状态见 [STATUS.md](STATUS.md)，目录见 [INDEX.md](INDEX.md)。
 
-**工程笔记 · 中英双语 · 2026-11-26（2026-11-27 修订）**
+**工程笔记 · 中英双语 · 2026-11-26**
 
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
@@ -15,7 +15,7 @@ Apple Silicon 的 macOS 上，用 `Zink → KosmicKrisp → Metal 4` 这条链�
 
 作者没有 Mac，也没写过 Mesa 驱动。文中内容基本是读别人的 MR、findings、gist 和反汇编拼出来的，加上别人提供的截图。凡是没亲手跑过的都标了出处；版本、CTS 数字、补丁编号以一手材料为准，转述错的地方欢迎直接改。
 
-笔记内容截至 2026-11-26，2026-11-27 按一手材料修订（改动见正文末尾「更正记录」）。上游变化很快（12 月中还有一版 SDK），过了这个点请以一手材料为准。
+笔记内容截至 2026-11-26。上游变化很快（12 月中还有一版 SDK），过了这个点请以一手材料为准。
 
 ## 目录
 
@@ -89,7 +89,7 @@ https://github.com/Chen-Mengze/zink-kosmickrisp-macos-notes
 
 ## English
 
-**Engineering notes: desktop OpenGL on macOS via Zink + KosmicKrisp (bilingual, 2026-11-26; revised 2026-11-27)**
+**Engineering notes: desktop OpenGL on macOS via Zink + KosmicKrisp (bilingual, 2026-11-26)**
 
 On Apple Silicon, desktop OpenGL can be served by the chain `Zink → KosmicKrisp → Metal 4`. This repository records how that chain is wired, how far others have already got, and what is still missing before anyone can ship it.
 

@@ -1,6 +1,6 @@
 # Running Desktop OpenGL on macOS with Zink + KosmicKrisp
 
-2026-11-26 (revised 2026-11-27; corrections at the end)
+2026-11-26
 
 Notes on getting desktop OpenGL running on Apple Silicon macOS via `Zink → KosmicKrisp → Metal 4`: the chain, what others have already done, and what is still missing before anyone starts real work.
 
@@ -427,22 +427,3 @@ First-hand records preferred, links where available. This document only cites fa
 **Local output**
 - Conclusions of the `renderpearl` static analysis (folded into the main text and E.2); bytecode output not shipped, generation method in `evidence/how_to_reproduce_disassembly_en.md`
 - F3 screenshot provided by [Glavo](https://github.com/Glavo), HMCL maintainer (`Vulkan 1.4.363 KosmicKrisp` / `Mesa 26.3.1`); both the image and the transcript are bundled. The backend is exposed by HMCL and only shown / switchable once KK has been installed through a package manager. Image scope: `CREDITS_AND_LICENSE_en.md`
-
----
-
-## Corrections (2026-11-27)
-
-This revision re-checked the paraphrase against the GitLab API, Mesa docs and release notes. The old figures are kept below so anyone who cited them can compare.
-
-| Was | Now | Basis |
-|---|---|---|
-| !44786 "40 commits / 6 pipelines / 15 reports" | 6 commits / 15 pipelines / 40 comments | GitLab MR API; `14f59d06` is the head, merged fast-forward, no merge commit |
-| Six commit hashes (`e2013af7` etc.) | `9a40f0c6` / `5c145789` / `531e208d` / `d9d36e78` / `2d817e53` / `14f59d06` | MR commits API |
-| Build A reports GL 3.1 | 2.1 | Zink's 3.0 tier requires XFB; !44928 says "from OpenGL 2.1 to 3.3"; the F3 screenshot has no GL line |
-| Build B "not measured" | 2.1 (GS only, no XFB) | same |
-| !44928 is still a draft | marked ready for review, still unmerged, head `e56f2e43` | GitLab MR API (updated 2026-11-19) |
-| Zink 3.0 "required to be exposed and fully supported" | "additional requirements must be met" | `docs.mesa3d.org/drivers/zink.html` |
-| `vkprofiles --compare` | no such subcommand; use `zink_check_requirements` per-tier Supported | Vulkan-Profiles docs and Mesa source |
-| GL 4.0 requires R32G32B32 `SAMPLED_IMAGE_BIT` | `UNIFORM_TEXEL_BUFFER_BIT`, plus maintenance3/4 | `gl40_baseline` in `VP_ZINK_requirements.json` |
-| Gist "likely" uses an override | confirmed `MESA_GL_VERSION_OVERRIDE=4.6` | the Gist's environment block |
-| "SDK 1.4.363.x / Mesa 26.3.1" | the SDK's KK is `26.3.0-devel`; 26.3.1 is the Homebrew build | SDK `config.json` + `aitor/mesa` branch `VERSION` |

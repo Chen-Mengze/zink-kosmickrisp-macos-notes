@@ -2,7 +2,7 @@
 
 Goal: **on Mesa main + !44928, what GL version does Zink actually report on KosmicKrisp, and what is missing?**
 
-About 40 minutes. No graphics development experience required.
+About 1–2 hours for the full track (a cold KK build is closer to two). No graphics development experience required.
 The core steps do **not** launch a game or any GL application — `zink_check_requirements` queries the current Vulkan device and prints `Supported` / `UNSUPPORTED` per tier; the highest Supported tier is the GL ceiling. Running an app is optional.
 
 ---
@@ -11,7 +11,7 @@ The core steps do **not** launch a game or any GL application — `zink_check_re
 
 - Apple Silicon (M1–M6), macOS 26 or 27
 - Xcode + Command Line Tools
-- 15 GB free disk; 15–25 min build
+- 15 GB free disk; a cold KK + Zink build takes about 1–2 hours (closer to two on an M1, faster on M4/M5)
 - LunarG Vulkan SDK (`vulkaninfo`, and static `spirv-tools`)
 - Network access to `gitlab.freedesktop.org`
 
@@ -19,7 +19,7 @@ This is a one-off measurement. Unset the environment afterwards and the system i
 
 ---
 
-## 0.5 Check build A first (10 minutes, tool only, no KK build)
+## 0.5 Check build A first (10 minutes to run; 20–40 minutes to build the tool from scratch)
 
 Before touching KK, run the checker against the **stock SDK build** to confirm A's ceiling. Expect 2.1, not 3.1:
 
@@ -37,7 +37,7 @@ ninja -C build-tools
 
 It prints `Supported` / `UNSUPPORTED` per `VP_ZINK_*` profile: expect `gl21` Supported and `gl30` UNSUPPORTED. It prints no version number and no missing-item table; the highest Supported tier is the ceiling.
 
-If `gl30` is also Supported, the SDK's KK already has XFB and the capability table needs changing. **Do this before spending 25 minutes on build B+.**
+If `gl30` is also Supported, the SDK's KK already has XFB and the capability table needs changing. **Do this before spending 1–2 hours on build B+.**
 
 ---
 
