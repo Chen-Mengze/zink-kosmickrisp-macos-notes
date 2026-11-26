@@ -47,9 +47,9 @@ Two practical consequences. First, static initialization: installing KK while HM
 
 ## 3. UI 与文案 | UI and strings
 
-选项在「游戏设置 → 高级 → 图形」，由 `GameSettingsPage` 的 `graphicsSettings` 构建。Vulkan 项是 `vulkanRendererPane`，候选项来自 `Renderer.getSupported(GraphicsAPI.VULKAN)`。单项键 `settings.advanced.renderer.kosmickrisp`，中文值 `KosmickKrisp`——多了一个 `k`，正确拼写是 `KosmicKrisp`；描述为「基于 Metal 4 的 Vulkan 渲染器 (实验性)」。
+选项在「游戏设置 → 高级 → 图形」，由 `GameSettingsPage` 的 `graphicsSettings` 构建。Vulkan 项是 `vulkanRendererPane`，候选项来自 `Renderer.getSupported(GraphicsAPI.VULKAN)`。单项键 `settings.advanced.renderer.kosmickrisp`，中文值 `KosmicKrisp`；描述为「基于 Metal 4 的 Vulkan 渲染器 (实验性)」。
 
-The option sits under “Game Settings → Advanced → Graphics”, built by `graphicsSettings` in `GameSettingsPage`. The Vulkan entry is `vulkanRendererPane`, with candidates from `Renderer.getSupported(GraphicsAPI.VULKAN)`. The per-item key is `settings.advanced.renderer.kosmickrisp`, whose Chinese value is `KosmickKrisp` — one extra `k`; the correct spelling is `KosmicKrisp`. The description reads “Metal 4-based Vulkan renderer (experimental)”.
+The option sits under “Game Settings → Advanced → Graphics”, built by `graphicsSettings` in `GameSettingsPage`. The Vulkan entry is `vulkanRendererPane`, with candidates from `Renderer.getSupported(GraphicsAPI.VULKAN)`. The per-item key is `settings.advanced.renderer.kosmickrisp`, whose Chinese value is `KosmicKrisp`. The description reads “Metal 4-based Vulkan renderer (experimental)”.
 
 可见性只跟版本有关：后端选择器要求 ≥ `26.2-snapshot-2`；Vulkan 渲染器要求 `GraphicsAPI.VULKAN.isSupported(version)`，即 ≥ `26.2-snapshot-1`。能不能选，仍由第 2 节决定。
 
