@@ -46,7 +46,7 @@ python kkcap.py selftest
 
 | 结果 | 含义 |
 |---|---|
-| `HARD` | 存在独立 geometry stage 文件（`.gsh` / `.geom`）。Iris/OptiFine 会无条件编译它 |
+| `HARD` | 存在独立 geometry stage 文件（`.gsh` / `.geom`）。通常意味着 pack 把 GS 当独立 stage 用，Iris/OptiFine 会尝试编译；`#if 0` 或宏保护要另看（见「局限」） |
 | `SOFT` | GS 内建只出现在 `#ifdef` 之类的预处理块里，且没有独立 stage 文件 |
 | `SUSPECT` | 非 stage 文件里出现未加保护的 GS 内建，写法需要作者确认 |
 | `NONE` | 没发现 GS |

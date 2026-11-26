@@ -17,7 +17,7 @@ MVK 仍然适用于 Intel Mac 和 macOS 26 以前的系统。
 - **B+**：再叠 !44928，作者口径 3.3。
 - **C**：main 加第三方补丁，报 4.6。
 
-这四套里只有 C 越过系统 GL 4.1；A/B/B+ 都低于 4.1，不产生 4.2–4.6 的增量。看到「4.6」先问：哪套构建，有没有 override。
+这四套里只有 C 越过系统 GL 4.1；A/B/B+ 都低于 4.1，不产生 4.2–4.6 的增量。
 
 再加上 `MESA_GL_VERSION_OVERRIDE` 可以把字符串改成任意值——那是显示层，不是能力层。看到一个「4.6」先问：哪套构建，有没有 override。
 
@@ -28,7 +28,7 @@ MVK 仍然适用于 Intel Mac 和 macOS 26 以前的系统。
 真实开销在三个地方：
 
 - **语义降级**：GS 在 Metal 上不存在，KK 先在 compute pass 里跑一遍数输出，再在光栅化 VS 里展开；XFB 同理。
-- **提交形状**：TBDR 怕 encoder 频繁开关。MC 的 Vulkan 后端每帧 45+ 次 `vkCmdBeginRendering`，每次在 Metal 侧都是一个独立 encoder 加一次 tile memory 冲洗。
+- **提交形状**：TBDR 怕 encoder 频繁开关。原生 Vulkan 后端每帧 45+ 次 `vkCmdBeginRendering`（这是 Mojang 的 Vulkan renderer 数据，不是 Zink 路径）；Zink 路径要看具体 GL 应用的 draw/state 分布，不能直接套这个数。每次在 Metal 侧都是一个独立 encoder 加一次 tile memory 冲洗。
 - **管线创建**：MSL 编译和 PSO 缓存，决定的是卡顿而不是平均帧。
 
 参考值：Zink 在 Linux 上是原生 GL 的 86%–95%；KK 对原生 Metal，LunarG 的口径是「不远」，不是「无损」。GPU-bound 场景叠起来大概在原生 Metal 的七到九成。这是推算，不是实测。

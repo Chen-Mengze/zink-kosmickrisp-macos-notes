@@ -23,6 +23,12 @@ Apple Silicon 的 macOS 上，用 `Zink（Mesa Gallium，GL → Vulkan）→ Kos
 |---|---|
 | [`Zink_KosmicKrisp_on_macOS_zh.md`](Zink_KosmicKrisp_on_macOS_zh.md) | 中文正文。起因、已有工作、链路与增量、Zink 逐档需求、版本口径、实施计划、已知的坑、附录 A–E |
 | [`Zink_KosmicKrisp_on_macOS_en.md`](Zink_KosmicKrisp_on_macOS_en.md) | English version of the same note |
+| [`STATUS.md`](STATUS.md) | 状态表：公开数据现状、待办、谁手里有什么、什么时候该停 |
+| [`FAQ.md`](FAQ.md) | 常见问题：MVK、GL 版本口径、性能、日常可用性 |
+| [`INDEX.md`](INDEX.md) | 按目的找的索引 |
+| [`action/`](action) | 测试协议、招募文案、验收判据、HMCL 接入点 |
+| [`tools/`](tools) | `kkcap.py`（能力记录）、`packscan.py`（光影包 GS 扫描） |
+| [`data/`](data) | 真机记录，一条一个目录 |
 | [`CREDITS_AND_LICENSE_zh.md`](CREDITS_AND_LICENSE_zh.md) | 许可、第三方归属、图片使用范围、未随包材料的去处、移除请求渠道 |
 | [`CREDITS_AND_LICENSE_en.md`](CREDITS_AND_LICENSE_en.md) | 同上，英文版 |
 | [`evidence/`](evidence) | 证据材料：F3 截图与文字转录、Mesa !44786 最短引用摘录、反汇编复现方法（中英各一份） |
