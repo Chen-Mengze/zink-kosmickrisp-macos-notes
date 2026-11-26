@@ -8,7 +8,7 @@ Where I'm coming from: I don't own a Mac and I've never written a Mesa driver. W
 
 I'm publishing it to find three kinds of people: anyone with an Apple Silicon machine willing to send back a `vulkaninfo` dump and the fixed sample results in Appendix C; shaderpack authors who can say whether GS in their pack is a hard or soft dependency; and the authors of the material listed below — if I've misrepresented something, or if you'd like to cross-link your findings, just say so in your own repo or here. No project to join, no single line to toe. Work separately and put results somewhere public.
 
-Bottom line: the chain works, but current release builds are not an out-of-the-box feature. The Zink chain starts at 2.1; the first two gates are `geometryShader` and transform feedback, neither in the SDK; 4.x above that also waits on a set of Hadron patches. None of it is an architecture problem.
+Bottom line: the chain works, but current release builds are not an out-of-the-box feature. System GL 4.1 already has the 3.2/4.0 set; the payoff here is the 4.2–4.6 delta, but Zink first has to climb from 2.1 to 3.3, then take the Hadron patches to 4.6. None of it is an architecture problem.
 
 The text and my own analysis are released under **CC BY 4.0**: repost, split, rewrite, just credit the source. Third-party material is used only for factual citation and links and remains with its respective authors; what is and isn't bundled, and why, is in `CREDITS_AND_LICENSE_en.md`. The Chinese version is `Zink_KosmicKrisp_on_macOS_zh.md`.
 
@@ -18,9 +18,9 @@ The text and my own analysis are released under **CC BY 4.0**: repost, split, re
 
 Terminology: “system GL” means macOS's OpenGL.framework, **not a hardware-native driver**. There is no native OpenGL driver on Apple Silicon; the version string reads `4.1 Metal - ...`, i.e. Apple's GL implementation runs on top of Metal.
 
-Apple's OpenGL has been frozen at 4.1 since 2013 and was deprecated in 2018. The system GL stack has the 3.2/4.0 features — geometry shaders, transform feedback, tessellation, indirect draw (the M1 4.1 extension dump lists `GL_EXT_geometry_shader4` and `GL_EXT_transform_feedback`) — but not the 4.2 image/atomic features or the 4.3 compute/SSBO features. The same silicon reports GL 4.6 under Asahi Linux, so the problem is the driver, not the hardware.
+Apple's OpenGL has been frozen at 4.1 since 2013 and was deprecated in 2018. System GL 4.1 already has the 3.2/4.0 set; what is missing is the GL 4.2 image load/store and atomic counters, and the GL 4.3 compute/SSBO features. The same silicon reports GL 4.6 under Asahi Linux, so the problem is the driver, not the hardware.
 
-It isn't only games. The Blender developer portal has a KosmicKrisp page: it runs from 5.1 and lists limitations one by one — GS unsupported, shaders sometimes failing to compile, `setup-env.sh` still defaulting to MoltenVK so you have to set `VK_DRIVER_FILES` by hand. The page explicitly says this is a convenience for developers switching between Metal and Vulkan on one machine, not something intended for official releases. On the shaderpack side, OptiFine gets only 8 color attachments on macOS; Iris can use all 16 buffers. What actually stops Iris is the GL 4.3 compute/SSBO set. Shaderpack authors say GS is effectively required for voxel-related shaders; system GL 4.1 does have GS, so GS is not the system GL gap.
+It isn't only games. The Blender developer portal has a KosmicKrisp page: it runs from 5.1 and lists limitations one by one — GS unsupported, shaders sometimes failing to compile, `setup-env.sh` still defaulting to MoltenVK so you have to set `VK_DRIVER_FILES` by hand. The page explicitly says this is a convenience for developers switching between Metal and Vulkan on one machine, not something intended for official releases. On the shaderpack side, OptiFine gets only 8 color attachments on macOS; Iris can use all 16 buffers. What actually stops Iris is the GL 4.3 compute/SSBO set.
 
 Minecraft Java is just the handiest sample. Native Vulkan was the default only in the 26.2 snapshot window; the 26.2 release switched back to OpenGL. Iris itself remains OpenGL-only, and its docs currently list Apple Silicon as unsupported (driver crashes), so GL 4.x-dependent shaderpacks have no second path. The GL path also covers older versions with no native backend at all. Take the actual default from `options.txt` and F3; HMCL's modelling is only a cross-check.
 
@@ -47,7 +47,7 @@ These records barely reference each other. The Gist author writes "maybe one day
 
 ---
 
-## The chain, and two integration traps
+## The chain: what it unlocks
 
 ```
 GL app / shaderpack / mod
@@ -59,7 +59,17 @@ GL app / shaderpack / mod
 
 Capabilities are gated by Zink on individual Vulkan features; `VP_ZINK_requirements.json` packages those requirements into per-GL-version profiles for `zink_check_requirements`. The querying party is Zink and the GLSL workload, not the application's own Vulkan extension whitelist.
 
-These two pits are **pits in the Zink chain, not in system GL**: system GL 4.1 has GS and XFB, but not the 4.2+ image/atomic features or the 4.3 compute/SSBO features. For Zink to climb from 2.1 to 4.x it must first add 3.0/3.2, then the 4.0 format bits; only after those three steps does it get past system GL 4.1.
+System GL 4.1 already has the 3.2/4.0 set. The point of this chain is not to repeat those, but to expose the 4.2–4.6 delta. The main additions in build C (GL 4.6) over system GL 4.1:
+
+| GL | New extensions / features | What it enables |
+|---|---|---|
+| 4.2 | `GL_ARB_shader_image_load_store`, `GL_ARB_shader_atomic_counters` | image load/store, atomic counters |
+| 4.3 | `GL_ARB_compute_shader`, `GL_ARB_shader_storage_buffer_object`, `GL_ARB_vertex_attrib_binding`, `GL_ARB_texture_view` | compute/SSBO (the key for Iris), DSA groundwork, texture views |
+| 4.4 | `GL_ARB_buffer_storage`, `GL_ARB_multi_bind`, `GL_ARB_clear_texture` | persistent mapped buffers, multi-bind, clear texture |
+| 4.5 | `GL_ARB_direct_state_access`, `GL_ARB_clip_control`, `GL_ARB_derivative_control` | DSA, clip control, derivative control |
+| 4.6 | `GL_ARB_indirect_parameters`, `GL_ARB_pipeline_statistics_query`, `GL_ARB_polygon_offset_clamp`, `GL_ARB_shader_draw_parameters` | indirect parameters, pipeline stats, polygon offset clamp, etc. |
+
+That is the delta from C over system GL 4.1. B+ stops at 3.3, still below system GL 4.1, so it does not produce these; A/B are lower still. The chain's visible payoff starts at C. `GL_ARB_bindless_texture` and `GL_ARB_sparse_texture` are optional and not in the baseline; whether they work depends on optional Zink/KK support, so don't assume them.
 
 The generic approach is to ship the loader and the KK ICD inside the app bundle, set `VK_DRIVER_FILES` (or `VK_ICD_FILENAMES`) per process, and on the GL side use `MESA_LOADER_DRIVER_OVERRIDE=zink` with bundled `libGL` / `libEGL`. LunarG's October write-up already draws the layout: dylibs in `Contents/Frameworks/`, json in `Contents/Resources/vulkan/icd.d/`, `library_path` as `"../../../Frameworks/libvulkan_kosmickrisp.dylib"`, and explicitly advises against installing the loader into `/usr/local/lib`. pauyedin's repo is a working kit. No need to design this layer from scratch.
 
@@ -86,7 +96,7 @@ The disassembly started as an answer to "did MC hard-wire MVK?" Once someone in 
 
 Inside an application's own native Vulkan backend, that's right. MC's `ppEnabledExtensionNames` is built only from Mojang's predefined FeatureSets — `requiredFeatureSets()` / `optionalFeatureSets()` in the disassembly are the whitelist — and `VkApplicationInfo.apiVersion` is pinned to 1.2. A hundred extra extensions advertised below won't be used up there.
 
-The Zink chain has no such layer. Whether the GL side reports a given version is Zink comparing the driver's capability table tier by tier; whether a shaderpack written as `#version 330` with a geometry stage compiles depends directly on the `geometryShader` feature bit. One more bit below → one more tier of GL semantics → one more shader that produces a picture. By the same token "we have to wait for the application upstream to change code" doesn't hold: an OpenGL path plus replaced GL/EGL natives is enough, all process-local.
+The Zink chain has no such layer. Whether the GL side reports a given version is Zink comparing the driver's capability table tier by tier; one more feature bit below means one more tier of GL semantics, and one more shader that produces a picture. By the same token "we have to wait for the application upstream to change code" doesn't hold: an OpenGL path plus replaced GL/EGL natives is enough, all process-local.
 
 "If there's no clear performance win, don't do it" — agreed, but that governs whether users get a permanent toggle, not whether the research and tooling get built. What's recorded here is capability diffs, reproducible builds and regression cases, not an option that defaults to on.
 
@@ -98,7 +108,7 @@ The Zink chain has no such layer. Whether the GL side reports a given version is
 
 - The **2.1 baseline** has a pile of extensions and features (six line features from `VK_EXT_line_rasterization`, `custom_border_color` with `customBorderColorWithoutFormat`, `provoking_vertex`, `robustness2` + `nullDescriptor`, …). Mesa notes these are not all validated: missing them doesn't lower the version, it produces rendering errors, validation errors, or crashes. A capability diff has to separate hard gates from unvalidated items.
 - **3.0** needs `VK_EXT_transform_feedback` and `VK_EXT_conditional_rendering`.
-- **3.2** needs `depthClamp`, `geometryShader`, `shaderTessellationAndGeometryPointSize`, `VK_EXT_depth_clip_enable`. Order matters: 3.0 requires XFB first, 3.2 requires GS second. Only when XFB is present and GS is missing does the ceiling stop at 3.1; missing both means 2.1. Shaderpacks written at 330+ fail to compile on either 2.1 or 3.1.
+- **3.2** needs `depthClamp`, `geometryShader`, `shaderTessellationAndGeometryPointSize`, `VK_EXT_depth_clip_enable`. Tiers are cumulative: fail a lower tier and every higher tier fails with it.
 - **The GL 4.0 blocker differs by build; don't present the two as one answer.** The current `VP_ZINK_requirements.json`'s `gl40_baseline` lists `UNIFORM_TEXEL_BUFFER_BIT` on the three R32G32B32 formats and no `shaderFloat64`; Hadron 0054 fixed exactly that texel buffer and went from 3.3 to 4.6. Playport 0087's build records `shaderFloat64` (KK lacks the feature) as its 4.0 gate, so it stops at 3.3. Both are true of their own trees; always name the build.
 - `VK_EXT_transform_feedback on pvr` in the Mesa 26.3 new-features list is the PowerVR driver, not kk.
 
@@ -108,11 +118,20 @@ No need to write a checker. `meson -Dtools=zink` produces `zink_check_requiremen
 
 ## Version bookkeeping
 
+Keep three build variants (with B split into B and B+, the latter plus !44928), and always say which one a capability claim refers to:
+
+- **A**: the KK inside SDK 1.4.363.1 (Mesa 26.3.0-devel), or Homebrew Mesa 26.3.1. The baseline for public claims; GL 2.1 (per the !44928 author's A/B).
+- **B**: self-built Mesa main (with `14f59d06`); record the commit. Still GL 2.1 (same source).
+- **B+**: B plus !44928. GL 3.3 per the author, still below system GL 4.1.
+- **C**: Mesa main plus the Hadron 0038–0083 patch series, reports GL 4.6; adds the 4.2–4.6 set over system GL 4.1. This is a proper engineering record with `findings.md`, CTS scripts, owner decisions and a "deliberately left for alpha" list — just not on the SDK release line.
+
+**Results from C must not be used to claim what A supports.** The other easy misread: B+'s 3.3 is still below system GL 4.1; the chain only gets past the system GL stack at C. Both go in the document, the capability statement and the report template.
+
 MR !44786 (`kk: Add geometry shader support`, Junmin Lee) was merged into main by Marge Bot at 2026-10-29 22:39 GMT+8. The merge brought in 6 commits, headed by `14f59d06` (`kk: Advertise geometryShader`); there is no separate merge commit. The MR page carries 15 pipelines (the last one green) and 40 comments. It wires up poly's existing lowering (the same one Honeykrisp uses) and also fixes adjacency index rewriting, tess→GS primitive ID, fence stripping after image stores, stores/atomics running only once (deleted from the compute copy), and exact-thread indirect dispatch. squidbus ran full CTS on an M4 Max with no failures; Mary Guillemard verified `primitive_id.matching` fixed on HK; Aitor Camacho reviewed-by and assigned the merge. In the discussion Willie Abrams said "I have transform feedback working on top of this MR" and opened !44928; it was a draft then, has since been marked ready for review, and is still unmerged at head `e56f2e43`.
 
-Merged 29 October, 26.3.1 released 18 November — looks like it made the cut, but it didn't. Mesa cuts the feature release branch from main on the day of the first RC; after that 26.3.x only takes cherry-picked bugfixes: 10-14 rc1 (branchpoint) → 10-21 rc2 → 10-28 rc3 → 11-04 rc4/final → 11-18 26.3.1. GS landed two weeks after the cut. The 26.3.1 release notes say `New features: None`; searching the MR page for `26.3` / `backport` / `cherry` returns nothing. On the SDK side the newest is 1.4.363.1 (early-November patch release), 1.4.363.0 was late September. The SDK's KK is built from the `vulkan-sdk-1.4.363.0` branch whose VERSION is `26.3.0-devel`, so it has no GS either. No November SDK carries GS. Khronos says the next one is mid-December, mainly for removing the portability extensions; whether it includes `14f59d06` needs release notes or an actual `vulkaninfo` run.
+Merged 29 October, 26.3.1 released 18 November — looks like it made the cut, but it didn't. Mesa cuts the feature release branch from main on the day of the first RC; after that 26.3.x only takes cherry-picked bugfixes: 10-14 rc1 (branchpoint) → 10-21 rc2 → 10-28 rc3 → 11-04 rc4/final → 11-18 26.3.1. The merge landed two weeks after the cut. The 26.3.1 release notes say `New features: None`; searching the MR page for `26.3` / `backport` / `cherry` returns nothing. On the SDK side the newest is 1.4.363.1 (early-November patch release), 1.4.363.0 was late September. The SDK's KK is built from the `vulkan-sdk-1.4.363.0` branch whose VERSION is `26.3.0-devel`, so it does not have that capability either. No November SDK carries that capability. Khronos says the next one is mid-December, mainly for removing the portability extensions; whether it includes `14f59d06` needs release notes or an actual `vulkaninfo` run.
 
-The community F3 screenshot reads `Vulkan 1.4.363 KosmicKrisp` / `Mesa 26.3.1`. The first is the Vulkan API version the driver reports (it follows the Vulkan-Headers version Mesa was built against); the second is the Mesa build. Neither is the SDK package version, and neither implies the other's capabilities. The 26.3 branch was cut on 10-14 and GS merged on 10-29, so that machine has no GS; the F3 page does not show a GL version either.
+The community F3 screenshot reads `Vulkan 1.4.363 KosmicKrisp` / `Mesa 26.3.1`. The first is the Vulkan API version the driver reports (it follows the Vulkan-Headers version Mesa was built against); the second is the Mesa build. Neither is the SDK package version, and neither implies the other's capabilities. The 26.3 branch was cut on 10-14 and GS merged on 10-29, so that machine is not a C build; the F3 page does not show a GL version either.
 
 ![F3 on an M6: top right reads Vulkan 1.4.363 KosmicKrisp Mesa 26.3.1](evidence/screenshot_M6_F3_KosmicKrisp.jpg)
 
@@ -122,16 +141,7 @@ Also readable: `Minecraft 26.3 (26.3/vanilla)`, `Java: 25.0.5.0.3`, `CPU: 12x Ap
 
 Scope of use and takedown for the image: `CREDITS_AND_LICENSE_en.md`.
 
-Keep three build variants (with B split into B and B+, the latter plus !44928), and always say which one a capability claim refers to:
-
-- **A**: the KK inside SDK 1.4.363.1 (Mesa 26.3.0-devel), or Homebrew Mesa 26.3.1. The baseline for public claims; neither `geometryShader` nor XFB, GL 2.1 (per the !44928 author's A/B).
-- **B**: self-built Mesa main (with `14f59d06`). GS yes, XFB no; record the commit. Still GL 2.1 (same source).
-- **B+**: B plus !44928. GS and XFB both present, GL 3.3 per the MR author. Still below native macOS GL 4.1.
-- **C**: Mesa main plus the Hadron 0038–0083 patch series. GS and XFB both present, reports GL 4.6. This is a proper engineering record with `findings.md`, CTS scripts, owner decisions and a "deliberately left for alpha" list — just not on the SDK release line.
-
-**Results from C must not be used to claim what A supports.** The other easy misread: B+'s 3.3 is still below system GL 4.1; the chain only gets past the system GL stack at C. Both go in the document, the capability statement and the report template.
-
-Known blemish: Aitor saw `dEQP-VK.spirv_assembly.instruction.graphics.float16.logical_nan.opfordequal_vector_geom` fail on M5 Pro / macOS 27, judged to be a Metal compiler bug absent on M3-4; M1 hadn't been run at the time. A separate group of CTS timeout cases was going to get its own spec/CTS issue, skipped in internal CI before the merge. Newer machines can't be assumed clean. GS is split into a compute pass that counts outputs and a rasterization VS that expands them, so the shader runs twice and frame-time shape differs from native GS.
+Known blemish: Aitor saw `dEQP-VK.spirv_assembly.instruction.graphics.float16.logical_nan.opfordequal_vector_geom` fail on M5 Pro / macOS 27, judged to be a Metal compiler bug absent on M3-4; M1 hadn't been run at the time. A separate group of CTS timeout cases was going to get its own spec/CTS issue, skipped in internal CI before the merge. Newer machines can't be assumed clean.
 
 ---
 
@@ -391,7 +401,7 @@ Mary Guillemard: Working fine on HK and fixing
 
 ### E.2 Disassembly conclusions (no bytecode)
 
-The points in "The chain, and two integration traps" come from static analysis of game-client classes. The output is a derivative of proprietary bytecode and isn't shipped; generate it yourself via `evidence/how_to_reproduce_disassembly_en.md`. Conclusions only, for cross-checking:
+The points in "The chain: what it unlocks" come from static analysis of game-client classes. The output is a derivative of proprietary bytecode and isn't shipped; generate it yourself via `evidence/how_to_reproduce_disassembly_en.md`. Conclusions only, for cross-checking:
 
 - `VulkanBackend.loadLibrary()` passes `SharedLibrary.getPath()` (a runtime path, not a literal), then compares two `vkGetInstanceProcAddr` addresses and throws `BackendCreationException` plus unload if they differ.
 - `VulkanBackend.createDevice()` enumerates the extensions the driver actually exposes, then runs `isSupported` over the required / requiredIfAvailable / optional groups, adding and logging `Enabling ... FeatureSet` only on success.

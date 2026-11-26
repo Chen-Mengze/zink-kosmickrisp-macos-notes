@@ -9,7 +9,7 @@
 
 Apple Silicon 的 macOS 上，用 `Zink（Mesa Gallium，GL → Vulkan）→ KosmicKrisp（Vulkan → Metal 4）→ Apple Silicon GPU` 这条链把桌面 OpenGL 顶起来：链路怎么走、别人已经做到哪一步、真要动手还差什么。中文正文与英文版并列，附证据材料与引用说明。
 
-> **结论**：链路是通的，当前发布版还不能当开箱功能发。Zink 链从 2.1 起步，最靠前的两个门槛是 `geometryShader` 与 transform feedback 没进 SDK；再往上的 4.x 还压着一组 Hadron 补丁。
+> **结论**：链路是通的，当前发布版还不能当开箱功能发。系统 GL 4.1 已经有 3.2/4.0 的能力；这条链的收益是 4.2–4.6 的增量，但要先让 Zink 链从 2.1 爬到 3.3，再叠 Hadron 补丁到 4.6。
 
 ## 先交代底细
 
@@ -21,7 +21,7 @@ Apple Silicon 的 macOS 上，用 `Zink（Mesa Gallium，GL → Vulkan）→ Kos
 
 | 文件 | 内容 |
 |---|---|
-| [`Zink_KosmicKrisp_on_macOS_zh.md`](Zink_KosmicKrisp_on_macOS_zh.md) | 中文正文。起因、已有工作、链路与两个坑、Zink 逐档需求、版本口径、实施计划、已知的坑、附录 A–E |
+| [`Zink_KosmicKrisp_on_macOS_zh.md`](Zink_KosmicKrisp_on_macOS_zh.md) | 中文正文。起因、已有工作、链路与增量、Zink 逐档需求、版本口径、实施计划、已知的坑、附录 A–E |
 | [`Zink_KosmicKrisp_on_macOS_en.md`](Zink_KosmicKrisp_on_macOS_en.md) | English version of the same note |
 | [`CREDITS_AND_LICENSE_zh.md`](CREDITS_AND_LICENSE_zh.md) | 许可、第三方归属、图片使用范围、未随包材料的去处、移除请求渠道 |
 | [`CREDITS_AND_LICENSE_en.md`](CREDITS_AND_LICENSE_en.md) | 同上，英文版 |
@@ -51,16 +51,14 @@ GL 应用 / 光影 / 模组
 
 ## 版本口径：三套构建（B 再分 B+）不能混着说
 
-| 构建 | 是什么 | `geometryShader` | transform feedback | 参考 GL 上限 |
-|---|---|---|---|---|
-| **A** | SDK 1.4.363.1 内置 KK（Mesa 26.3.0-devel）；截图里是 Homebrew Mesa 26.3.1 | ✗ | ✗ | 2.1（3.0 起就要求 XFB） |
-| **B** | Mesa main 自编译（含 `14f59d06`） | ✓ | ✗ | 2.1（只多一个 GS 位，3.0 仍被 XFB 卡住） |
-| **B+** | B 再叠 !44928（head `e56f2e43`） | ✓ | ✓ | 3.3（!44928 作者口径，待实机复核） |
-| **C** | main + Hadron 0038–0083 补丁 | ✓ | ✓ | 4.6（Hadron 记录） |
+| 构建 | 是什么 | Zink GL | 相对系统 GL 4.1 多出什么 |
+|---|---|---|---|
+| **A** | SDK 1.4.363.1 内置 KK（Mesa 26.3.0-devel）；截图里是 Homebrew Mesa 26.3.1 | 2.1 | 无（低于 4.1） |
+| **B** | Mesa main 自编译（含 `14f59d06`） | 2.1 | 无（低于 4.1） |
+| **B+** | B 再叠 !44928（head `e56f2e43`） | 3.3（作者口径，待实机复核） | 无（仍低于 4.1） |
+| **C** | main + Hadron 0038–0083 补丁 | 4.6（Hadron 记录） | 4.2–4.6：image/atomic、compute/SSBO、DSA、buffer_storage、clip_control 等 |
 
-C 的结果不能拿去说 A 支持什么。另一个容易看岔的：B+ 的 3.3 仍低于 macOS 系统 GL 4.1，只有 C 的 4.6 越过系统 GL 栈。这两条同时写进正文、能力声明和回传模板。
-
-补一句容易看岔的：Mesa 的 feature release 在第一个 RC 那天就从 main 切了分支，GS 是 10-29 合的、26.3.1 是 11-18 发的，看着像赶上了，其实没进。所以「装了最新 KK 就有 GS」目前不成立。退一步说，就算装到带 GS 的构建，GL 也还是 2.1——3.0 先要求 XFB，3.2 才轮到 GS。
+C 的结果不能拿去说 A 支持什么。另一个容易看岔的：B+ 的 3.3 仍低于系统 GL 4.1，只有 C 的 4.6 越过系统 GL 栈；这条链的可见收益从 C 开始算。
 
 ## 找三类人
 
@@ -93,7 +91,7 @@ https://github.com/Chen-Mengze/zink-kosmickrisp-macos-notes
 
 On Apple Silicon, desktop OpenGL can be served by the chain `Zink (Mesa Gallium, GL → Vulkan) → KosmicKrisp (Vulkan → Metal 4) → Apple Silicon GPU`. This repository records how that chain is wired, how far others have already got, and what is still missing before anyone can ship it.
 
-> **TL;DR** — the chain works; the current release cannot be shipped as an out-of-the-box feature. The Zink chain starts at 2.1; the first two gates are `geometryShader` and transform feedback, neither in the SDK; 4.x above that also waits on a set of Hadron patches.
+> **TL;DR** — the chain works; the current release cannot be shipped as an out-of-the-box feature. System GL 4.1 already has the 3.2/4.0 set; the payoff here is the 4.2–4.6 delta, but Zink first has to climb from 2.1 to 3.3, then take the Hadron patches to 4.6.
 
 The author has no Mac and has never written a Mesa driver. Everything here is assembled from other people's merge requests, findings documents, gists and disassembly, plus a screenshot provided by someone else. Anything not run first-hand is attributed; versions, CTS numbers and patch IDs defer to the primary material. Corrections are welcome.
 
@@ -101,7 +99,7 @@ The author has no Mac and has never written a Mesa driver. Everything here is as
 
 | File | What it is |
 |---|---|
-| [`Zink_KosmicKrisp_on_macOS_en.md`](Zink_KosmicKrisp_on_macOS_en.md) | The English note: background, prior work, the chain and two integration traps, per-version Zink requirements, version bookkeeping, plan, known traps, appendices A–E |
+| [`Zink_KosmicKrisp_on_macOS_en.md`](Zink_KosmicKrisp_on_macOS_en.md) | The English note: background, prior work, the chain and what it unlocks, per-version Zink requirements, version bookkeeping, plan, known traps, appendices A–E |
 | [`Zink_KosmicKrisp_on_macOS_zh.md`](Zink_KosmicKrisp_on_macOS_zh.md) | Chinese version of the same note |
 | [`CREDITS_AND_LICENSE_en.md`](CREDITS_AND_LICENSE_en.md) | Licence, third-party attribution, image scope, where non-bundled material lives, takedown channel |
 | [`CREDITS_AND_LICENSE_zh.md`](CREDITS_AND_LICENSE_zh.md) | The same, in Chinese |
@@ -117,14 +115,14 @@ The author has no Mac and has never written a Mesa driver. Everything here is as
 
 ### Builds A/B/C (B split into B and B+)
 
-| Build | What it is | `geometryShader` | transform feedback | GL ceiling |
-|---|---|---|---|---|
-| **A** | KK inside SDK 1.4.363.1 (Mesa 26.3.0-devel); the screenshot shows Homebrew Mesa 26.3.1 | no | no | 2.1 (XFB is required from 3.0 on) |
-| **B** | Mesa main, self-built (includes `14f59d06`) | yes | no | 2.1 (one more GS bit; 3.0 is still blocked by XFB) |
-| **B+** | B plus !44928 (head `e56f2e43`) | yes | yes | 3.3 (per the !44928 author; to be confirmed on hardware) |
-| **C** | main + Hadron patches 0038–0083 | yes | yes | 4.6 (per Hadron records) |
+| Build | What it is | Zink GL | What it adds over system GL 4.1 |
+|---|---|---|---|
+| **A** | KK inside SDK 1.4.363.1 (Mesa 26.3.0-devel); the screenshot shows Homebrew Mesa 26.3.1 | 2.1 | none (below 4.1) |
+| **B** | Mesa main, self-built (includes `14f59d06`) | 2.1 | none (below 4.1) |
+| **B+** | B plus !44928 (head `e56f2e43`) | 3.3 (per the !44928 author; to be confirmed) | none (still below 4.1) |
+| **C** | main + Hadron patches 0038–0083 | 4.6 (per Hadron records) | 4.2–4.6: image/atomic, compute/SSBO, DSA, buffer_storage, clip_control, etc. |
 
-Results from C cannot be used to claim anything about A. The other easy misread: B+'s 3.3 is still below macOS system GL 4.1; only C's 4.6 gets past the system GL stack. Even a build with GS but without XFB stays at 2.1: 3.0 already requires transform feedback.
+Results from C cannot be used to claim anything about A. The other easy misread: B+'s 3.3 is still below system GL 4.1; only C's 4.6 gets past the system GL stack. The chain's visible payoff starts at C.
 
 ### Contribute
 

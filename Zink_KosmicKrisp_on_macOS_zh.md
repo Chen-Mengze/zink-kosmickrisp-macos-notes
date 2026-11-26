@@ -8,7 +8,7 @@
 
 公开这份笔记是想找三类人：手上有 Apple Silicon 机器、愿意按附录 C 回传一份 `vulkaninfo` 和固定样本结果的；写光影包、能说清自己那个 pack 里的 GS 是硬依赖还是软依赖的；以及下面列到的那几份材料的作者——如果哪条转述错了、或者愿意把各自的 findings 互相挂个链接，直接在原仓库或这里指出就行。不要求谁加入什么项目，也不需要统一口径，各做各的、把结果放回公开处就够。
 
-结论：链路是通的，当前发布版还不能当开箱功能发。Zink 链从 2.1 起步，最靠前的两个门槛是 `geometryShader` 与 transform feedback 没进 SDK；再往上的 4.x 还压着一组 Hadron 补丁，不是架构问题。
+结论：链路是通的，当前发布版还不能当开箱功能发。系统 GL 4.1 已经有 3.2/4.0 的能力；这条链的收益是 4.2–4.6 的增量，但要先让 Zink 链从 2.1 爬到 3.3，再叠 Hadron 补丁到 4.6。不是架构问题。
 
 本文正文和自写的分析稿按 CC BY 4.0 放出，可以转载、拆分、改写，标个出处即可。第三方材料只做事实性引用和链接，版权归各自作者；随包附了什么、没附什么、为什么，见 `CREDITS_AND_LICENSE_zh.md`。英文版是 `Zink_KosmicKrisp_on_macOS_en.md`，对应的许可说明是 `CREDITS_AND_LICENSE_en.md`。
 
@@ -18,9 +18,9 @@
 
 先厘清一个词：本文说「系统 GL」或「自带 GL」，指 macOS 的 OpenGL.framework，**不是硬件原生驱动**。Apple Silicon 上没有原生 OpenGL 驱动；版本串直接写 `4.1 Metal - ...`，即 Apple 自己的 GL 实现跑在 Metal 之上。
 
-苹果的 OpenGL 从 2013 年起停在 4.1，2018 年标了 deprecated。系统 GL 栈有 3.2/4.0 那批东西（geometry、transform feedback、tessellation、indirect draw；M1 的 4.1 扩展表里能查到 `GL_EXT_geometry_shader4` 和 `GL_EXT_transform_feedback`），但 GL 4.2 起的 image load/store、atomic counters，以及 4.3 的 compute、SSBO 都没有。同一块芯片 Asahi Linux 已经能报 GL 4.6，问题在驱动。
+苹果的 OpenGL 从 2013 年起停在 4.1，2018 年标了 deprecated。系统 GL 4.1 的 3.2/4.0 能力已经在了；真正缺的是 GL 4.2 起的 image load/store、atomic counters，以及 4.3 的 compute、SSBO。同一块芯片 Asahi Linux 已经能报 GL 4.6，问题在驱动。
 
-受影响的远不止游戏。Blender 开发者门户有一页 KosmicKrisp，5.1 起能跑，逐条列着 limitation：GS 不支持、shader 有时编译失败、`setup-env.sh` 默认配的还是 MoltenVK 得手动改 `VK_DRIVER_FILES`。页面上注了一句，这是给开发者在同一台机器上切 Metal/Vulkan 用的便利选项，没打算进正式发行。光影包这边，OptiFine 在 macOS 只有 8 个 color attachment，Iris 能用到全部 16 个 buffer；真正卡住 Iris 的是 4.3 的 compute/SSBO 那一批。做光影的人说 GS 对体素相关着色器基本是必需的；系统 GL 4.1 本身有 GS，所以 GS 不是系统 GL 栈的缺口。
+受影响的远不止游戏。Blender 开发者门户有一页 KosmicKrisp，5.1 起能跑，逐条列着 limitation：GS 不支持、shader 有时编译失败、`setup-env.sh` 默认配的还是 MoltenVK 得手动改 `VK_DRIVER_FILES`。页面上注了一句，这是给开发者在同一台机器上切 Metal/Vulkan 用的便利选项，没打算进正式发行。光影包这边，OptiFine 在 macOS 只有 8 个 color attachment，Iris 能用到全部 16 个 buffer；真正卡住 Iris 的是 4.3 的 compute/SSBO 那一批。
 
 MC Java 只是手上最方便的样本。26.2 的快照窗口里原生 Vulkan 曾是默认，26.2 正式版又切回 OpenGL；Iris 本体仍是 OpenGL-only，官方目前把 Apple Silicon 列为不支持（驱动崩溃），依赖 GL 4.x 的光影没有第二条路。走 GL 路径还覆盖早期没有原生后端的版本。默认值以实机 `options.txt` 和 F3 为准，HMCL 代码里的建模只是旁证。
 
@@ -47,7 +47,7 @@ Khronos 在 11 月 25 日弃用 MoltenVK、收掉 Portability Initiative，`VK_K
 
 ---
 
-## 链路，两个会踩的坑
+## 链路：打通后多出什么
 
 ```
 GL 应用 / 光影 / 模组
@@ -59,7 +59,17 @@ GL 应用 / 光影 / 模组
 
 能力是 Zink 按底层 Vulkan feature 逐项 gate 出来的；`VP_ZINK_requirements.json` 把这些要求按 GL 版本整理成 profile，给 `zink_check_requirements` 用。查询方是 Zink 和 GLSL 负载，不是上层应用那份 Vulkan 扩展白名单。
 
-这两个坑是 **Zink 链的坑，不是系统 GL 的坑**：系统 GL 4.1 有 GS 和 XFB，但没有 4.2+ 的 image/atomic、4.3 的 compute/SSBO。Zink 要从 2.1 爬到 4.x，先得补 3.0/3.2，再补 4.0 的格式位；这三步都过了，才谈得上越过系统 GL 4.1。
+系统 GL 4.1 已经有 3.2/4.0 的能力；这条链要证明的不是重复这些，而是把 4.2–4.6 的增量重新暴露出来。C 构建（GL 4.6）相对系统 GL 4.1 多出的主要扩展：
+
+| GL | 新增扩展 / 特性 | 对应用的意义 |
+|---|---|---|
+| 4.2 | `GL_ARB_shader_image_load_store`、`GL_ARB_shader_atomic_counters` | 影像读写、原子计数 |
+| 4.3 | `GL_ARB_compute_shader`、`GL_ARB_shader_storage_buffer_object`、`GL_ARB_vertex_attrib_binding`、`GL_ARB_texture_view` | compute/SSBO（Iris 光影的关键）、DSA 前置、纹理视图 |
+| 4.4 | `GL_ARB_buffer_storage`、`GL_ARB_multi_bind`、`GL_ARB_clear_texture` | 持久映射缓冲、批量绑定、清纹理 |
+| 4.5 | `GL_ARB_direct_state_access`、`GL_ARB_clip_control`、`GL_ARB_derivative_control` | DSA、clip control、derivative control |
+| 4.6 | `GL_ARB_indirect_parameters`、`GL_ARB_pipeline_statistics_query`、`GL_ARB_polygon_offset_clamp`、`GL_ARB_shader_draw_parameters` | 间接参数、管线统计、polygon offset clamp 等 4.6 核心项 |
+
+这是 C 构建相对系统 GL 4.1 的增量。B+ 只到 3.3，仍低于系统 GL 4.1，不产生这些增量；A/B 更低。换句话说，这条链的可见收益要从 C 开始算。`GL_ARB_bindless_texture`、`GL_ARB_sparse_texture` 这类是 optional，不在 baseline 里，能不能用取决于 Zink/KK 的可选支持，别当默认。
 
 通用做法是把 loader 和 KK 的 ICD 打进应用包，进程里设 `VK_DRIVER_FILES`（或 `VK_ICD_FILENAMES`），GL 侧 `MESA_LOADER_DRIVER_OVERRIDE=zink` 加自带的 `libGL` / `libEGL`。LunarG 十月那篇把目录画好了：`Contents/Frameworks/` 放 dylib，`Contents/Resources/vulkan/icd.d/` 放 json，`library_path` 写 `"../../../Frameworks/libvulkan_kosmickrisp.dylib"`，并说不推荐把 loader 装到 `/usr/local/lib`。pauyedin 那个仓库是现成可跑的 kit。这层不用另设计。
 
@@ -86,7 +96,7 @@ LWJGL 类应用（MC Java 是其一）多一层：LWJGL 在 macOS 默认先加�
 
 在应用自带的原生 Vulkan 后端里，这话对。MC 的 `ppEnabledExtensionNames` 只由 Mojang 预定义的 FeatureSet 构造，反汇编里 `requiredFeatureSets()` / `optionalFeatureSets()` 就是白名单，`VkApplicationInfo.apiVersion` 锁在 1.2。底层多宣告一百个扩展，那边也不会用。
 
-Zink 链里没有这层。GL 侧报不报某个版本，是 Zink 拿驱动的能力表逐档比出来的；光影包写 `#version 330` 加 geometry stage，编译能不能过取决于 `geometryShader` 这个位在不在。底层多一个位 → 多一档 GL 语义 → 多一个能出画面的 shader。同理「得等应用上游改代码」也不成立，走 OpenGL 路径加替换 GL/EGL native 就够了。
+Zink 链里没有这层。GL 侧报不报某个版本，是 Zink 拿驱动的能力表逐档比出来的；底层多一个 feature 位，GL 侧就多一档语义，就多一个能编译出画面的 shader。同理「得等应用上游改代码」也不成立，走 OpenGL 路径加替换 GL/EGL native 就够了。
 
 「没有明显性能提升就不做」这条认，但它管的是要不要给用户一个常设开关，不是管要不要把调研和工具做出来。这里记的是差集数据、可复现构建和回归用例，不是一个默认打开的选项。
 
@@ -98,7 +108,7 @@ Zink 链里没有这层。GL 侧报不报某个版本，是 Zink 拿驱动的能
 
 - **2.1 基线**有一堆扩展和 feature（`VK_EXT_line_rasterization` 六个 line feature、`custom_border_color` 带 `customBorderColorWithoutFormat`、`provoking_vertex`、`robustness2` + `nullDescriptor`……）。官方自己注了：这些不全校验，缺了不会降版本，而是渲染出错、validation error，甚至崩。差集里得把硬门槛和未校验项分开标。
 - **3.0** 要 `VK_EXT_transform_feedback`、`VK_EXT_conditional_rendering`。
-- **3.2** 要 `depthClamp`、`geometryShader`、`shaderTessellationAndGeometryPointSize`、`VK_EXT_depth_clip_enable`。注意顺序：3.0 先要求 XFB，3.2 才要求 GS。只有 XFB 到位、GS 缺失时，天花板才停在 3.1；两者都缺是 2.1。按 330 以上写的光影在 2.1 和 3.1 上都编译不过。
+- **3.2** 要 `depthClamp`、`geometryShader`、`shaderTessellationAndGeometryPointSize`、`VK_EXT_depth_clip_enable`。档位是累积的：低一档缺项，高一档也过不去。
 - **4.0 的卡点随构建不同，不要并列当同一件事**：当前 `VP_ZINK_requirements.json` 的 `gl40_baseline` 列的是 R32G32B32 三格式的 `UNIFORM_TEXEL_BUFFER_BIT`，没有 `shaderFloat64`；Hadron 0054 修的正是这个 texel buffer，修完从 3.3 到 4.6。Playport 0087 那套构建记的是 `shaderFloat64`（KK 没这个 feature），所以停在 3.3。两份材料各自成立，引用时带构建。
 - Mesa 26.3 新特性清单里 `VK_EXT_transform_feedback on pvr` 是 PowerVR 驱动，不是 kk。
 
@@ -108,11 +118,20 @@ Zink 链里没有这层。GL 侧报不报某个版本，是 Zink 拿驱动的能
 
 ## 版本口径
 
+构建分三套（B 再分出叠了 !44928 的 B+），写能力结论时带上是哪套：
+
+- **A**：SDK 1.4.363.1 里的 KK（Mesa 26.3.0-devel），或 Homebrew Mesa 26.3.1。对外承诺基线，GL 2.1（按 !44928 作者口径推算）。
+- **B**：Mesa main 自编译（含 `14f59d06`），注明 commit；GL 仍是 2.1（同上）。
+- **B+**：B 再叠 !44928，作者口径 3.3，仍低于系统 GL 4.1。
+- **C**：Mesa main 加 Hadron 0038–0083 系列补丁，报 GL 4.6；相对系统 GL 4.1 多出 4.2–4.6 那批扩展。这套有 `findings.md`、CTS 脚本、owner 决策记录和「故意留给 alpha」清单，是正式工程记录，只是没进 SDK 发布线。
+
+C 的结果不能拿去说 A 支持什么。另一个容易看岔的：B+ 的 3.3 仍低于系统 GL 4.1，这条链要真正超过系统 GL 栈，得走到 C。这两条都写进文档、能力声明和回传模板。
+
 MR !44786（`kk: Add geometry shader support`，Junmin Lee）2026-10-29 22:39 GMT+8 由 Marge Bot 合进 main。合入的是 6 个 commit，head 为 `14f59d06`（`kk: Advertise geometryShader`），没有单独的 merge commit；MR 页面对应 15 条流水线（最后一条通过）和 40 条评论。实现接 poly 现成的 lowering（Honeykrisp 同源），顺带修了 adjacency 索引重写、tess→GS 的 primitive ID、image store 后的 fence 剥离、GS 的 stores/atomics 只保留一份（从 compute 副本里删掉）、exact-thread 间接 dispatch。squidbus 在 M4 Max 跑 full CTS 零失败，Mary Guillemard 在 HK 上验证修好 `primitive_id.matching`，Aitor Camacho reviewed-by 并指派合并。讨论里 Willie Abrams 说 "I have transform feedback working on top of this MR"，开了 !44928；当时是 draft，现在已转为待评审（ready），仍未合入，head `e56f2e43`。
 
-10 月 29 合入、26.3.1 是 11 月 18 发的，看着像赶上了，其实没有。Mesa 的 feature release 在第一个 RC 那天就把分支从 main 切出来，之后 26.3.x 只收 cherry-pick 的 bugfix：10-14 rc1(branchpoint) → 10-21 rc2 → 10-28 rc3 → 11-04 rc4/final → 11-18 26.3.1。GS 比切分支晚两周。26.3.1 release notes 写 `New features: None`；MR 页面全文搜 `26.3` / `backport` / `cherry` 零命中。SDK 侧最新 1.4.363.1（11 月初补丁版），1.4.363.0 是 9 月底；SDK 里的 KK 从 `vulkan-sdk-1.4.363.0` 分支编出，VERSION 是 `26.3.0-devel`，同样不含 GS。11 月没有带 GS 的新 SDK。Khronos 说的下一版在 12 月中，主要做 portability 扩展移除，带不带 `14f59d06` 等 release notes 或实跑 `vulkaninfo`。
+10 月 29 合入、26.3.1 是 11 月 18 发的，看着像赶上了，其实没有。Mesa 的 feature release 在第一个 RC 那天就把分支从 main 切出来，之后 26.3.x 只收 cherry-pick 的 bugfix：10-14 rc1(branchpoint) → 10-21 rc2 → 10-28 rc3 → 11-04 rc4/final → 11-18 26.3.1。合入比切分支晚两周。26.3.1 release notes 写 `New features: None`；MR 页面全文搜 `26.3` / `backport` / `cherry` 零命中。SDK 侧最新 1.4.363.1（11 月初补丁版），1.4.363.0 是 9 月底；SDK 里的 KK 从 `vulkan-sdk-1.4.363.0` 分支编出，VERSION 是 `26.3.0-devel`，同样不含这个能力。11 月没有带这个能力的新 SDK。Khronos 说的下一版在 12 月中，主要做 portability 扩展移除，带不带 `14f59d06` 等 release notes 或实跑 `vulkaninfo`。
 
-社区那张 F3 截图是 `Vulkan 1.4.363 KosmicKrisp` / `Mesa 26.3.1`。前一个是驱动报的 Vulkan API 版本（跟构建时用的 Vulkan-Headers 走），后一个是 Mesa 构建版本；两个都不是 SDK 包版本，也互不代表对方的能力。26.3 分支 10-14 就切了、GS 10-29 才合，所以那台机器没有 GS；这页也不显示 GL 版本。
+社区那张 F3 截图是 `Vulkan 1.4.363 KosmicKrisp` / `Mesa 26.3.1`。前一个是驱动报的 Vulkan API 版本（跟构建时用的 Vulkan-Headers 走），后一个是 Mesa 构建版本；两个都不是 SDK 包版本，也互不代表对方的能力。26.3 分支 10-14 就切了、GS 10-29 才合，所以那台机器不是 C 构建；这页也不显示 GL 版本。
 
 ![M6 上的 F3，右上读到 Vulkan 1.4.363 KosmicKrisp Mesa 26.3.1](evidence/screenshot_M6_F3_KosmicKrisp.jpg)
 
@@ -122,16 +141,7 @@ MR !44786（`kk: Add geometry shader support`，Junmin Lee）2026-10-29 22:39 GM
 
 图片的使用范围与撤回方式见 `CREDITS_AND_LICENSE_zh.md`。
 
-构建分三套（B 再分出叠了 !44928 的 B+），写能力结论时带上是哪套：
-
-- **A**：SDK 1.4.363.1 里的 KK（Mesa 26.3.0-devel），或 Homebrew Mesa 26.3.1。对外承诺基线，`geometryShader` 和 XFB 都没有，GL 2.1（按 !44928 作者口径推算）。
-- **B**：Mesa main 自编译（含 `14f59d06`）。GS 有，XFB 没有，注明 commit；GL 仍是 2.1（同上）。
-- **B+**：B 再叠 !44928。GS 和 XFB 都有，作者口径 3.3。仍低于 macOS 系统 GL 4.1。
-- **C**：Mesa main 加 Hadron 0038–0083 系列补丁。GS 和 XFB 都有，报 GL 4.6。这套有 `findings.md`、CTS 脚本、owner 决策记录和「故意留给 alpha」清单，是正式工程记录，只是没进 SDK 发布线。
-
-C 的结果不能拿去说 A 支持什么。另一个容易看岔的：B+ 的 3.3 仍低于系统 GL 4.1，这条链要真正超过系统 GL 栈，得走到 C。这两条都写进文档、能力声明和回传模板。
-
-已知瑕疵：Aitor 在 M5 Pro / macOS 27 上见 `dEQP-VK.spirv_assembly.instruction.graphics.float16.logical_nan.opfordequal_vector_geom` 失败，判断是 M3-4 上没有的 Metal 编译器 bug，当时 M1 还没跑。另有一组 CTS 超时用例拟另提 spec/CTS issue，合并前内部 CI 先 skip。GS 是拆成 compute 计数 + 光栅化 VS 展开两遍，帧时间形态和原生 GS 不一样。
+已知瑕疵：Aitor 在 M5 Pro / macOS 27 上见 `dEQP-VK.spirv_assembly.instruction.graphics.float16.logical_nan.opfordequal_vector_geom` 失败，判断是 M3-4 上没有的 Metal 编译器 bug，当时 M1 还没跑。另有一组 CTS 超时用例拟另提 spec/CTS issue，合并前内部 CI 先 skip。
 
 ---
 
@@ -391,7 +401,7 @@ Mary Guillemard: Working fine on HK and fixing
 
 ### E.2 反汇编结论（不贴字节码）
 
-正文「链路，两个会踩的坑」那节那几条来自对游戏客户端 class 的静态分析。产物属专有字节码的派生内容，不随公开包分发；按 `evidence/how_to_reproduce_disassembly_zh.md` 可自行生成。这里只列结论，便于对照：
+正文「链路：打通后多出什么」那节那几条来自对游戏客户端 class 的静态分析。产物属专有字节码的派生内容，不随公开包分发；按 `evidence/how_to_reproduce_disassembly_zh.md` 可自行生成。这里只列结论，便于对照：
 
 - `VulkanBackend.loadLibrary()` 传的是 `SharedLibrary.getPath()`（运行时路径，不是字面量），随后比较两个 `vkGetInstanceProcAddr` 的地址，不等就抛 `BackendCreationException` 并 unload。
 - `VulkanBackend.createDevice()` 先枚举驱动实际暴露的扩展，再对 required / requiredIfAvailable / optional 三组逐个 `isSupported`，通过才加入并打 `Enabling ... FeatureSet` 日志。

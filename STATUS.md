@@ -4,25 +4,25 @@
 
 ## 一句话
 
-链路是通的，卡在最靠前的两个能力位：XFB 挡 3.0，GS 挡 3.2。现在的瓶颈不是研究，是**没有人在真机上把「Vulkan 能力表 / Zink 差集 / 实际 GL 版本」这三样东西在同一台机器上对齐过一次**。
+链路是通的，当前 Zink 构建停在 2.1/3.3，还没越过系统 GL 4.1；只有 C 到 4.6 才多出 4.2–4.6 那批扩展。现在的瓶颈不是研究，是**没有人在真机上把「Vulkan 能力表 / Zink 差集 / 实际 GL 版本」这三样东西在同一台机器上对齐过一次**。
 
 ## 公开数据现状
 
-| 构建 | 定义 | GS | XFB | 观测/推算的 GL | 来源与可信度 |
-|---|---|---|---|---|---|
-| A | SDK 1.4.363.1 内置 KK（Mesa 26.3.0-devel）；截图里是 Homebrew Mesa 26.3.1 | ✗ | ✗ | 2.1 | !44928 描述 + Zink 3.0 档硬要求 XFB；F3 截图只证明驱动名，不含 GL 版本 |
-| B | main + `14f59d06` | ✓ | ✗ | 2.1 | 同上；实机数据仍为零 |
-| B+ | main + `14f59d06` + !44928 | ✓ | ✓ | 3.3（作者口径） | !44928 描述：“from OpenGL 2.1 to 3.3 (ES 3.1)”；待实机复核 |
-| C | main + Hadron 0038–0083 | ✓ | ✓ | 4.6 | Hadron findings + CTS 15,304 pass / 1 fail |
+| 构建 | 定义 | 观测/推算的 GL | 相对系统 GL 4.1 多出什么 | 来源与可信度 |
+|---|---|---|---|---|
+| A | SDK 1.4.363.1 内置 KK（Mesa 26.3.0-devel）；截图里是 Homebrew Mesa 26.3.1 | 2.1 | 无（低于 4.1） | !44928 作者 A/B 推算；F3 截图只证明驱动名，不含 GL 版本 |
+| B | main + `14f59d06` | 2.1 | 无（低于 4.1） | 同上；实机数据仍为零 |
+| B+ | main + `14f59d06` + !44928 | 3.3（作者口径） | 无（仍低于 4.1） | !44928 描述：“from OpenGL 2.1 to 3.3 (ES 3.1)”；待实机复核 |
+| C | main + Hadron 0038–0083 | 4.6 | 4.2–4.6：image/atomic、compute/SSBO、DSA 等 | Hadron findings + CTS 15,304 pass / 1 fail |
 
-口径说明：那张 F3 截图只有 `Vulkan 1.4.363` / `Mesa 26.3.1`，没有 GL 版本。Zink 3.0 档要求 `VK_EXT_transform_feedback`，没有它连 3.0 都过不去，所以 A 和 B 都停在 2.1；!44928 作者写的也是「加上它才从 2.1 到 3.3」。只带 GS 的包不会抬高版本号。B+ 的 3.3 仍低于 macOS 系统 GL 4.1，只有 C 的 4.6 越过系统 GL 栈。
+口径说明：那张 F3 截图只有 `Vulkan 1.4.363` / `Mesa 26.3.1`，没有 GL 版本。A/B 的 2.1 和 B+ 的 3.3 都按 !44928 作者的 A/B 推算；B+ 仍低于系统 GL 4.1，只有 C 的 4.6 越过系统 GL 栈，才多出 4.2–4.6 那批扩展。
 
 ## 待办（按顺序，每条都有判据）
 
 1. **10 分钟复核构建 A**（工具已编好；从零编 `-Dtools=zink` 另加 20–40 分钟）— 不需要编 KK。跑之前把 `VK_DRIVER_FILES` 指向 SDK 的 KK ICD，并设 `MESA_KK_EXPERIMENTAL=custom_border`（只给 checker），再跑 `zink_check_requirements`。
    判据：`VP_ZINK_gl30_baseline` UNSUPPORTED。`gl21` 也可能因 2.1 的软/WSI 要求（custom border、incremental_present）报 UNSUPPORTED，需另跑 GL 应用确认实际版本；若 3.0 也 Supported，说明 SDK 里已经有 XFB，能力表要改。
 2. **1–2 小时测构建 B+** — 叠 !44928（head `e56f2e43`），出 `vulkaninfo --json` 和逐档结果。
-   判据：GL 能不能到 3.3；不能的话缺哪一项。B（只有 GS、没有 XFB）预期仍是 2.1。
+   判据：GL 能不能到 3.3；不能的话缺哪一项。B 预期仍是 2.1。
 3. **光影包定性** — 用 `tools/packscan.py` 扫目标 pack，得到 HARD / SOFT / NONE。
    判据：至少两个 SSPT/体素类 pack + 一个真 GS 负载，硬依赖占比是多少。
 4. **确认 SDK 内容** — 把 1、2 的结果贴到 !44928，并问 12 月中 SDK 是否含 `14f59d06`。

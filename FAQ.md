@@ -4,7 +4,7 @@
 
 Khronos 在 2026-11-25 弃用了 MoltenVK，同时收掉 Portability Initiative，`VK_KHR_portability_subset` 要从 spec 和 headers 里删掉，MVK 不再有新扩展。KosmicKrisp 是 Mesa 主线里的驱动，Vulkan 1.4 conformant，走 Metal 4，不需要 portability 那一套。
 
-更实际的一条：**MVK 没有 `geometryShader`**，所以 Zink-on-MVK 到不了 GL 3.2。但 macOS 系统 GL 4.1（Apple 的 OpenGL.framework，跑在 Metal 之上）本身是带 GS 的（3.2 core 起就有），所以「macOS 没有 GS」只对 MVK / 这条 Zink 链成立，对系统 GL 不成立。
+更实际的一条：MVK 被 Khronos 弃用，Vulkan 能力也不完整；Zink-on-MVK 到不了 GL 3.2。系统 GL 4.1 缺的是 4.2+ 的 image/atomic、4.3 的 compute/SSBO，这条链要补的是这批。
 
 MVK 仍然适用于 Intel Mac 和 macOS 26 以前的系统。
 
@@ -12,12 +12,12 @@ MVK 仍然适用于 Intel Mac 和 macOS 26 以前的系统。
 
 三套构建（B 再分出叠了 !44928 的 B+）混着说：
 
-- **A**：SDK 1.4.363.1 里的 KK（Mesa 26.3.0-devel；截图里是 Homebrew 26.3.1），没有 GS，也没有 XFB，停在 2.1。
-- **B**：Mesa main 含 `14f59d06`，有 GS，没有 XFB，仍是 2.1——3.0 先要求 XFB。
-- **B+**：再叠 !44928，两个都有，作者口径 3.3。
-- **C**：main 加第三方补丁，两个都有，报 4.6。
+- **A**：SDK 1.4.363.1 里的 KK（Mesa 26.3.0-devel；截图里是 Homebrew 26.3.1），停在 2.1。
+- **B**：Mesa main 含 `14f59d06`，仍是 2.1。
+- **B+**：再叠 !44928，作者口径 3.3。
+- **C**：main 加第三方补丁，报 4.6。
 
-顺序要说对：XFB 挡 3.0，GS 挡 3.2；两个都缺是 2.1，不是 3.1。
+这四套里只有 C 越过系统 GL 4.1；A/B/B+ 都低于 4.1，不产生 4.2–4.6 的增量。看到「4.6」先问：哪套构建，有没有 override。
 
 再加上 `MESA_GL_VERSION_OVERRIDE` 可以把字符串改成任意值——那是显示层，不是能力层。看到一个「4.6」先问：哪套构建，有没有 override。
 
@@ -37,7 +37,7 @@ MVK 仍然适用于 Intel Mac 和 macOS 26 以前的系统。
 
 Metal 没有独立的 geometry stage。KK 接了 poly 现成的 lowering（Honeykrisp 同源），把 GS 拆成两遍：compute pass 先数出要发射多少顶点，光栅化 VS 再逐个展开。代价是**同一段 shader 要跑两遍**，帧时间形态和原生 GS 不一样。
 
-这也是为什么 GS 是「能跑」和「跑得好」之间的分界线：功能上通了，性能上要按负载单独看。
+这也是这条链的固有成本：功能上通了，性能上要按负载单独看。
 
 ## 5. 我能日常拿它玩游戏吗？
 
