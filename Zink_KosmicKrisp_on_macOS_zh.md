@@ -16,7 +16,7 @@
 
 ## 起因
 
-苹果的 OpenGL 从 2013 年起停在 4.1，2018 年标了 deprecated。原生栈有 3.2/4.0 那批东西（geometry、transform feedback、tessellation、indirect draw），但 GL 4.2 起的 image load/store、atomic counters，以及 4.3 的 compute、SSBO 都没有。同一块芯片 Asahi Linux 已经能报 GL 4.6，问题在驱动。
+苹果的 OpenGL 从 2013 年起停在 4.1，2018 年标了 deprecated。原生栈有 3.2/4.0 那批东西（geometry、transform feedback、tessellation、indirect draw；M1 的 4.1 扩展表里能查到 `GL_EXT_geometry_shader4` 和 `GL_EXT_transform_feedback`），但 GL 4.2 起的 image load/store、atomic counters，以及 4.3 的 compute、SSBO 都没有。同一块芯片 Asahi Linux 已经能报 GL 4.6，问题在驱动。
 
 受影响的远不止游戏。Blender 开发者门户有一页 KosmicKrisp，5.1 起能跑，逐条列着 limitation：GS 不支持、shader 有时编译失败、`setup-env.sh` 默认配的还是 MoltenVK 得手动改 `VK_DRIVER_FILES`。页面上注了一句，这是给开发者在同一台机器上切 Metal/Vulkan 用的便利选项，没打算进正式发行。光影包这边，OptiFine 在 macOS 只有 8 个 color attachment，Iris 能用到全部 16 个 buffer；真正卡住 Iris 的是 4.3 的 compute/SSBO 那一批。做光影的人说 GS 对体素相关着色器基本是必需的；原生 GL 4.1 本身有 GS，所以 GS 不是原生栈的缺口。
 
@@ -411,6 +411,7 @@ Mary Guillemard: Working fine on HK and fixing
 - Khronos 1.4 conformance 公告 https://www.khronos.org/news/archives/kosmickrisp-achieves-vulkan-1.4-conformance-on-apple-silicon ；XDC 2025 架构 slides https://www.khronos.org/developers/linkto/kosmickrisp-a-vulkan-to-metal-mesa-driver
 - Mesa !44786 https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/44786 、!44928 https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/44928
 - https://mesa3d.org/release-calendar.html 、https://docs.mesa3d.org/releasing.html 、https://docs.mesa3d.org/relnotes/26.3.1.html 、mesa-announce、https://vulkan.lunarg.com/sdk/home
+- M1 OpenGL 4.1 运行期扩展表（`Renderer: Apple M1` / `Version: 4.1 Metal - 71.0.7`，含 `GL_EXT_geometry_shader4`、`GL_EXT_transform_feedback`） https://gist.github.com/teki/f7930067af35d5890294a1663ba82dc8 ；Apple SceneKit `geometryShader` 文档 https://developer.apple.com/documentation/scenekit/scnprogram/1524049-geometryshader
 - Khronos 2026-11-25《From Portability to Conformance》 https://www.khronos.org/blog/from-portability-to-conformance-a-new-chapter-for-layered-vulkan-on-apple ；LunarG《The State of Vulkan on Apple – Oct. 2026》 https://www.lunarg.com/the-state-of-vulkan-on-apple-oct-2026
 - LWJGL `VK` / `Configuration.VULKAN_LIBRARY_NAME` 文档、SDL3 `SDL_Vulkan_LoadLibrary`
 

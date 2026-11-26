@@ -16,7 +16,7 @@ The text and my own analysis are released under **CC BY 4.0**: repost, split, re
 
 ## Why this came up
 
-Apple's OpenGL has been frozen at 4.1 since 2013 and was deprecated in 2018. The native stack has the 3.2/4.0 features — geometry shaders, transform feedback, tessellation, indirect draw — but not the 4.2 image/atomic features or the 4.3 compute/SSBO features. The same silicon reports GL 4.6 under Asahi Linux, so the problem is the driver, not the hardware.
+Apple's OpenGL has been frozen at 4.1 since 2013 and was deprecated in 2018. The native stack has the 3.2/4.0 features — geometry shaders, transform feedback, tessellation, indirect draw (the M1 4.1 extension dump lists `GL_EXT_geometry_shader4` and `GL_EXT_transform_feedback`) — but not the 4.2 image/atomic features or the 4.3 compute/SSBO features. The same silicon reports GL 4.6 under Asahi Linux, so the problem is the driver, not the hardware.
 
 It isn't only games. The Blender developer portal has a KosmicKrisp page: it runs from 5.1 and lists limitations one by one — GS unsupported, shaders sometimes failing to compile, `setup-env.sh` still defaulting to MoltenVK so you have to set `VK_DRIVER_FILES` by hand. The page explicitly says this is a convenience for developers switching between Metal and Vulkan on one machine, not something intended for official releases. On the shaderpack side, OptiFine gets only 8 color attachments on macOS; Iris can use all 16 buffers. What actually stops Iris is the GL 4.3 compute/SSBO set. Shaderpack authors say GS is effectively required for voxel-related shaders; native GL 4.1 does have GS, so GS is not the native-stack gap.
 
@@ -411,6 +411,7 @@ First-hand records preferred, links where available. This document only cites fa
 - Khronos 1.4 conformance announcement https://www.khronos.org/news/archives/kosmickrisp-achieves-vulkan-1.4-conformance-on-apple-silicon ; XDC 2025 architecture slides https://www.khronos.org/developers/linkto/kosmickrisp-a-vulkan-to-metal-mesa-driver
 - Mesa !44786 https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/44786 , !44928 https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/44928
 - https://mesa3d.org/release-calendar.html , https://docs.mesa3d.org/releasing.html , https://docs.mesa3d.org/relnotes/26.3.1.html , mesa-announce, https://vulkan.lunarg.com/sdk/home
+- M1 OpenGL 4.1 runtime extension dump (`Renderer: Apple M1` / `Version: 4.1 Metal - 71.0.7`, including `GL_EXT_geometry_shader4` and `GL_EXT_transform_feedback`) https://gist.github.com/teki/f7930067af35d5890294a1663ba82dc8 ; Apple SceneKit `geometryShader` docs https://developer.apple.com/documentation/scenekit/scnprogram/1524049-geometryshader
 - Khronos 2026-11-25 *From Portability to Conformance* https://www.khronos.org/blog/from-portability-to-conformance-a-new-chapter-for-layered-vulkan-on-apple ; LunarG *The State of Vulkan on Apple – Oct. 2026* https://www.lunarg.com/the-state-of-vulkan-on-apple-oct-2026
 - LWJGL `VK` / `Configuration.VULKAN_LIBRARY_NAME` docs, SDL3 `SDL_Vulkan_LoadLibrary`
 
