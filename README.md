@@ -7,7 +7,7 @@
 
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
-Apple Silicon 的 macOS 上，用 `Zink → KosmicKrisp → Metal 4` 这条链把桌面 OpenGL 顶起来：链路怎么走、别人已经做到哪一步、真要动手还差什么。中文正文与英文版并列，附证据材料与引用说明。
+Apple Silicon 的 macOS 上，用 `Zink（Mesa Gallium，GL → Vulkan）→ KosmicKrisp（Vulkan → Metal 4）→ Apple Silicon GPU` 这条链把桌面 OpenGL 顶起来：链路怎么走、别人已经做到哪一步、真要动手还差什么。中文正文与英文版并列，附证据材料与引用说明。
 
 > **结论**：链路是通的，当前发布版还不能当开箱功能发。最靠前的两个门槛是 `geometryShader` 与 transform feedback 没进 SDK；再往上的 4.x 还压着一组 Hadron 补丁。
 
@@ -91,7 +91,7 @@ https://github.com/Chen-Mengze/zink-kosmickrisp-macos-notes
 
 **Engineering notes: desktop OpenGL on macOS via Zink + KosmicKrisp (bilingual, 2026-11-26)**
 
-On Apple Silicon, desktop OpenGL can be served by the chain `Zink → KosmicKrisp → Metal 4`. This repository records how that chain is wired, how far others have already got, and what is still missing before anyone can ship it.
+On Apple Silicon, desktop OpenGL can be served by the chain `Zink (Mesa Gallium, GL → Vulkan) → KosmicKrisp (Vulkan → Metal 4) → Apple Silicon GPU`. This repository records how that chain is wired, how far others have already got, and what is still missing before anyone can ship it.
 
 > **TL;DR** — the chain works; the current release cannot be shipped as an out-of-the-box feature. The first two gates are `geometryShader` and transform feedback, neither in the SDK; 4.x above that also waits on a set of Hadron patches.
 

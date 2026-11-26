@@ -2,7 +2,7 @@
 
 2026-11-26
 
-Notes on getting desktop OpenGL running on Apple Silicon macOS via `Zink → KosmicKrisp → Metal 4`: the chain, what others have already done, and what is still missing before anyone starts real work.
+Notes on getting desktop OpenGL running on Apple Silicon macOS via `Zink (Mesa Gallium, GL → Vulkan) → KosmicKrisp (Vulkan → Metal 4) → Apple Silicon GPU`: the chain, what others have already done, and what is still missing before anyone starts real work.
 
 Where I'm coming from: I don't own a Mac and I've never written a Mesa driver. What follows is assembled from other people's MRs, findings, gists and disassembly, plus a screenshot someone else provided. Anything I haven't run myself is attributed; version numbers, CTS counts and patch numbers come from first-hand records, and I'll correct anything I got wrong. This document stands on the work of the people listed below, not on me.
 
@@ -164,9 +164,7 @@ What's left to close: these results don't cite each other; several places say "G
 
 **Real hardware comes from a community call.** Open to anyone stuck on Apple GL 4.1 and to developers, regardless of app, distribution or machine. The post should state experimental status, disabled by default, how to fall back to Apple GL, known rendering issues, that no personal data is collected, and that the three build variants must not be mixed. Report template in Appendix C. Aim for at least three chip / macOS combinations, including a recent machine to cover the float16 regression.
 
-**Then feed it back up.** The Mesa / LunarG ticket becomes: confirm whether the mid-December SDK or the next release branch contains `14f59d06`; track !44928; attach a real workload reproduction (MC 26.4 + Zink + Iris-class shaderpack + SSPT/voxel pack, plus a non-game GL app); report the float16 regression on newer machines. A documentation MR for the macOS section of `zink.html` — KK status, tier-by-tier diff method, known correctness items — is low-effort and widely reusable.
-
-Public artefacts worth leaving behind, with existing foundations in parentheses: capability-diff CLI (extend Mesa !36061's `zink_check_requirements` with GL 2.1 unvalidated-item labels), macOS bundle template (LunarG layout and pauyedin's working kit exist; make a generic version without app-specific assumptions), reproducible build script (pin commit + hash ID), multi-machine capability database, CTS regression cases (continue Hadron's numbering), the documentation patch above, a hard/soft/degradable three-state convention for shaderpacks, and an upstream issue template. The first three are enough for someone else to pick it up.
+Public artefacts worth leaving behind, with existing foundations in parentheses: capability-diff CLI (extend Mesa !36061's `zink_check_requirements` with GL 2.1 unvalidated-item labels), macOS bundle template (LunarG layout and pauyedin's working kit exist; make a generic version without app-specific assumptions), reproducible build script (pin commit + hash ID), multi-machine capability database, CTS regression cases (continue Hadron's numbering), and a hard/soft/degradable three-state convention for shaderpacks. The first three are enough for someone else to pick it up.
 
 ---
 
@@ -191,7 +189,7 @@ Public artefacts worth leaving behind, with existing foundations in parentheses:
 - Whether a pack with a real GS stage produces a picture on build B+ (with !44928) — currently a blank.
 - Which of Hadron 0038–0083 already landed in Mesa main and which exist only in the project's own `patches/`. This decides how B is built and whether C's results can be migrated into B.
 - Whether those authors want their findings gathered in one place, or at least cross-linked.
-- If the samples turn out to be all hard dependencies and XFB has no path for a long time, close the implementation branch and keep the research conclusions and upstream tickets rather than pretending it passed.
+- If the samples turn out to be all hard dependencies and XFB has no path for a long time, close the implementation branch and keep the research conclusions rather than pretending it passed.
 
 I haven't verified a single one of the above myself — especially the ones about real hardware, CTS and patch status, which could be entirely wrong. Trust the respective first-hand records, and feel free to edit this document directly.
 

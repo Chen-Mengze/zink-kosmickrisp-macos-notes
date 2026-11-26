@@ -25,10 +25,8 @@
    判据：GL 能不能到 3.3；不能的话缺哪一项。B（只有 GS、没有 XFB）预期仍是 2.1。
 3. **光影包定性** — 用 `tools/packscan.py` 扫目标 pack，得到 HARD / SOFT / NONE。
    判据：至少两个 SSPT/体素类 pack + 一个真 GS 负载，硬依赖占比是多少。
-4. **上游问询** — 把 1、2 的结果贴到 !44928，并问 12 月中 SDK 是否含 `14f59d06`。
+4. **确认 SDK 内容** — 把 1、2 的结果贴到 !44928，并问 12 月中 SDK 是否含 `14f59d06`。
    判据：拿到维护者一句明确答复（含或不含）。
-5. **文档 MR** — 把 Zink 文档的 macOS 章节从一句话扩成现状 + 差集方法。
-   判据：MR 提交，不论是否合入。
 
 ## 谁手里有什么
 
@@ -42,16 +40,6 @@
 | pauyedin | 可跑 kit + 缓存/闪烁补丁 | 通用化（去掉具体应用假设） |
 | Glavo / HMCL | 条件式 KK 开关（只覆盖 Vulkan 后端） | GL 路径的三件套开关 + 带 GS/XFB 的包 |
 
-## 顺手能做的上游 PR
-
-都不用 Mac，也不用等任何数据：
-
-1. **i18n 拼写**：`settings.advanced.renderer.kosmickrisp=KosmickKrisp` 多了一个 `k`。一行，改完就是对的。
-2. **Homebrew 自定义前缀**：`HomebrewUtils` 里留着 `// TODO: custom Homebrew prefix for macOS`，现在只认 `/opt/homebrew` 和 `/usr/local`。
-3. **macOS 的 GL/Zink 分支**：`Renderer.OpenGL.ZINK` 在 macOS 可见但空操作。补 `MESA_LOADER_DRIVER_OVERRIDE` 和 `-Dorg.lwjgl.opengl.libname` 两个点即可；前提是有一个可用的 Mesa `libGL.dylib`。细节在 `action/07_hmcl_integration_zh.md`。
-
-前两个是「一定能合」的，第三个要先解决 `libGL` 来源，别急着提。
-
 ## 什么时候该停
 
 提前写死，避免沉没成本：
@@ -59,7 +47,7 @@
 - 目标负载**全是** GS 硬依赖，而 XFB 长期没有上游路径；
 - 或者 B+（叠了 !44928）在 M1/M2、M3/M4、M5/M6 三类上都报不回 3.2 以上。
 
-命中任一条，就关掉实施分支，只保留调查结论和上游票。
+命中任一条，就关掉实施分支，只保留调查结论。
 
 ## 更新规则
 

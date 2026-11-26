@@ -110,17 +110,7 @@ Open prerequisite: whether Homebrew's mesa ships a `libGL.dylib` usable by Zink 
 
 Boundary: a launcher can only fix “which library” and “which variables”. GL context and surface integration (`NSViewBackingLayer` → `CAMetalLayer`) remains on the application or driver side; the gist's ten problems do not disappear because HMCL changed.
 
-## 6. 三个顺手的小 PR | Three small PRs
-
-1. i18n 拼写：`KosmickKrisp` → `KosmicKrisp`，一行。
-2. Homebrew 自定义前缀，替掉 `TODO`。
-3. macOS 的 GL/Zink 分支（第 5 节），先解决 `libGL` 来源再提。
-
-1. i18n typo: `KosmickKrisp` → `KosmicKrisp`, one line.
-2. Custom Homebrew prefix, replacing the `TODO`.
-3. The macOS GL/Zink branch (section 5); resolve the `libGL` source before filing.
-
-## 7. 核对方法 | How to verify
+## 6. 核对方法 | How to verify
 
 ```bash
 git clone --depth 1 https://github.com/HMCL-dev/HMCL.git
