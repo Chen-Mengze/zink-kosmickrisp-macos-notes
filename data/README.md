@@ -13,7 +13,7 @@ YYYY-MM-DD_<芯片>_macOS<版本>_<构建>
 |---|---|---|
 | `kk.json` | 是 | `vulkaninfo --json` 原样输出，不要手改 |
 | `kk.json.meta.json` | 是 | 机器、系统、构建、commit、GL 版本 |
-| `requirements.txt` | 是 | `zink_check_requirements` 或 `vkprofiles --compare` 的输出 |
+| `requirements.txt` | 是 | `zink_check_requirements` 的逐档输出（Supported / UNSUPPORTED） |
 | `notes.md` | 否 | 异常、复现步骤、截图说明 |
 | `screenshot.png` | 否 | F3 或驱动信息截图，必须能读到驱动名 |
 

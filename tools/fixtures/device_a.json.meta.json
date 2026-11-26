@@ -1,7 +1,7 @@
 {
   "chip": "Apple M6 (iGPU)",
   "macos": "26.3",
-  "build": "A (SDK 1.4.363.1 / Mesa 26.3.1)",
-  "gl": "3.1",
-  "source": "社区 F3 截图（Glavo 提供），非本机实测"
+  "build": "A (SDK 1.4.363.1 / Mesa 26.3.0-devel 或 Homebrew 26.3.1)",
+  "gl": "2.1",
+  "source": "fixture，仅用于演示；按 !44928 描述，无 XFB 时 Zink 停在 2.1。F3 截图只证明驱动名，不含 GL 版本"
 }

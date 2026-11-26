@@ -1,5 +1,5 @@
 {
-  "_comment": "构建 B：Mesa main 含 14f59d06。GS 有，XFB 没有。这一档目前零公开数据。",
+  "_comment": "构建 B：Mesa main 含 14f59d06。GS 有，XFB 没有；按 !44928 描述预期仍是 2.1。这一档目前零实机数据。",
   "capabilities": {
     "device": {
       "properties": {

@@ -1,5 +1,5 @@
 {
-  "_comment": "构建 A：LunarG SDK 1.4.363.x / Mesa 26.3.1。GS 与 XFB 都没有。这是社区 F3 截图能对上的那一档。",
+  "_comment": "构建 A：SDK 1.4.363.1 的 KK（26.3.0-devel）或 Homebrew Mesa 26.3.1。GS 与 XFB 都没有；按 !44928 描述，这一档停在 2.1。F3 截图只对得上驱动名。",
   "capabilities": {
     "device": {
       "properties": {

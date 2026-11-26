@@ -6,13 +6,13 @@
 
 ---
 
-## 页面状态与描述定调句
+## 页面状态与计数（按 GitLab API 核对）
 
 ```text
 已合并
 kk: Add geometry shader support
 Junmin Lee 请求合并 junminlee2004/mesa:kk-geometry 到 main
-40 提交 / 6 流水线 / 15 报告
+6 提交 / 15 流水线 / 40 条评论
 ```
 
 > "This MR adds geometry shader support to the KosmicKrisp Vulkan driver
@@ -30,6 +30,8 @@ Junmin Lee 请求合并 junminlee2004/mesa:kk-geometry 到 main
 Aitor Camacho assigned to @marge-bot
 Marge Bot merged
 ```
+
+计数说明：提交数、流水线数与评论数按 GitLab API 于 2026-11-27 核对（6 / 15 / 40）。14f59d06 是源分支 head，合入方式为 fast-forward，没有单独的 merge commit。
 
 最终一批里的关键提交标题（事实信息）：
 

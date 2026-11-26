@@ -3,19 +3,19 @@
 > **现在最缺的一份数据**：M1/M2 + macOS 26 上，`main + !44928` 的 `vulkaninfo` 与 Zink 能力差集。
 > 10 分钟版本（不用编 KK）见 [action/02_test_protocol_zh.md](action/02_test_protocol_zh.md)；整体状态见 [STATUS.md](STATUS.md)，目录见 [INDEX.md](INDEX.md)。
 
-**工程笔记 · 中英双语 · 2026-11-26**
+**工程笔记 · 中英双语 · 2026-11-26（2026-11-27 修订）**
 
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
 Apple Silicon 的 macOS 上，用 `Zink → KosmicKrisp → Metal 4` 这条链把桌面 OpenGL 顶起来：链路怎么走、别人已经做到哪一步、真要动手还差什么。中文正文与英文版并列，附证据材料与引用说明。
 
-> **结论**：链路是通的，当前发布版还不能当开箱功能发。卡住的是两个没进 SDK 的能力——`geometryShader` 与 transform feedback——不是架构。
+> **结论**：链路是通的，当前发布版还不能当开箱功能发。最靠前的两个门槛是 `geometryShader` 与 transform feedback 没进 SDK；再往上的 4.x 还压着一组 Hadron 补丁。
 
 ## 先交代底细
 
 作者没有 Mac，也没写过 Mesa 驱动。文中内容基本是读别人的 MR、findings、gist 和反汇编拼出来的，加上别人提供的截图。凡是没亲手跑过的都标了出处；版本、CTS 数字、补丁编号以一手材料为准，转述错的地方欢迎直接改。
 
-笔记里所有日期截至 2026-11-26。上游变化很快（12 月中还有一版 SDK），过了这个点请以一手材料为准。
+笔记内容截至 2026-11-26，2026-11-27 按一手材料修订（改动见正文末尾「更正记录」）。上游变化很快（12 月中还有一版 SDK），过了这个点请以一手材料为准。
 
 ## 目录
 
@@ -49,17 +49,18 @@ GL 应用 / 光影 / 模组
 
 能力是 Zink 按 `VP_ZINK_requirements.json` 逐档查底层驱动的，查询方是 Zink 和 GLSL 负载，不是上层应用那份 Vulkan 扩展白名单。所以「上游应用用不到这些扩展、加了也没用」在原生 Vulkan 后端里成立，在这条链上不成立——底层多一个 feature 位，GL 侧就多一档语义，就多一个能编译出画面的 shader。
 
-## 版本口径：三套构建不能混着说
+## 版本口径：三套构建（B 再分 B+）不能混着说
 
 | 构建 | 是什么 | `geometryShader` | transform feedback | 参考 GL 上限 |
 |---|---|---|---|---|
-| **A** | LunarG SDK 1.4.363.x / Mesa 26.3.1 | ✗ | ✗ | 3.1（缺 GS 把天花板压回 3.1） |
-| **B** | Mesa main 自编译（含 `14f59d06`） | ✓ | ✗ | 未实测；XFB 卡在 draft !44928 |
+| **A** | SDK 1.4.363.1 内置 KK（Mesa 26.3.0-devel）；截图里是 Homebrew Mesa 26.3.1 | ✗ | ✗ | 2.1（3.0 起就要求 XFB） |
+| **B** | Mesa main 自编译（含 `14f59d06`） | ✓ | ✗ | 2.1（只多一个 GS 位，3.0 仍被 XFB 卡住） |
+| **B+** | B 再叠 !44928（head `e56f2e43`） | ✓ | ✓ | 3.3（!44928 作者口径，待实机复核） |
 | **C** | main + Hadron 0038–0083 补丁 | ✓ | ✓ | 4.6（Hadron 记录） |
 
 C 的结果不能拿去说 A 支持什么。这一条同时写在正文、能力声明和回传模板里。
 
-补一句容易看岔的：Mesa 的 feature release 在第一个 RC 那天就从 main 切了分支，GS 是 10-29 合的、26.3.1 是 11-18 发的，看着像赶上了，其实没进。所以「装了最新 KK 就有 GS」目前不成立。
+补一句容易看岔的：Mesa 的 feature release 在第一个 RC 那天就从 main 切了分支，GS 是 10-29 合的、26.3.1 是 11-18 发的，看着像赶上了，其实没进。所以「装了最新 KK 就有 GS」目前不成立。退一步说，就算装到带 GS 的构建，GL 也还是 2.1——3.0 先要求 XFB，3.2 才轮到 GS。
 
 ## 找三类人
 
@@ -88,11 +89,11 @@ https://github.com/Chen-Mengze/zink-kosmickrisp-macos-notes
 
 ## English
 
-**Engineering notes: desktop OpenGL on macOS via Zink + KosmicKrisp (bilingual, 2026-11-26)**
+**Engineering notes: desktop OpenGL on macOS via Zink + KosmicKrisp (bilingual, 2026-11-26; revised 2026-11-27)**
 
 On Apple Silicon, desktop OpenGL can be served by the chain `Zink → KosmicKrisp → Metal 4`. This repository records how that chain is wired, how far others have already got, and what is still missing before anyone can ship it.
 
-> **TL;DR** — the chain works; the current release cannot be shipped as an out-of-the-box feature. What blocks it is two capabilities that have not reached any SDK — `geometryShader` and transform feedback — not the architecture.
+> **TL;DR** — the chain works; the current release cannot be shipped as an out-of-the-box feature. The first two gates are `geometryShader` and transform feedback, neither in the SDK; 4.x above that also waits on a set of Hadron patches.
 
 The author has no Mac and has never written a Mesa driver. Everything here is assembled from other people's merge requests, findings documents, gists and disassembly, plus a screenshot provided by someone else. Anything not run first-hand is attributed; versions, CTS numbers and patch IDs defer to the primary material. Corrections are welcome.
 
@@ -114,15 +115,16 @@ The author has no Mac and has never written a Mesa driver. Everything here is as
 - **Want to check a citation** → [`evidence/`](evidence) holds the transcripts and shortest necessary quotes, each attributed.
 - **Want to contribute data** → the report template in Appendix C.
 
-### Builds A/B/C
+### Builds A/B/C (B split into B and B+)
 
 | Build | What it is | `geometryShader` | transform feedback | GL ceiling |
 |---|---|---|---|---|
-| **A** | LunarG SDK 1.4.363.x / Mesa 26.3.1 | no | no | 3.1 (missing GS caps it) |
-| **B** | Mesa main, self-built (includes `14f59d06`) | yes | no | not measured; XFB waits on draft !44928 |
+| **A** | KK inside SDK 1.4.363.1 (Mesa 26.3.0-devel); the screenshot shows Homebrew Mesa 26.3.1 | no | no | 2.1 (XFB is required from 3.0 on) |
+| **B** | Mesa main, self-built (includes `14f59d06`) | yes | no | 2.1 (one more GS bit; 3.0 is still blocked by XFB) |
+| **B+** | B plus !44928 (head `e56f2e43`) | yes | yes | 3.3 (per the !44928 author; to be confirmed on hardware) |
 | **C** | main + Hadron patches 0038–0083 | yes | yes | 4.6 (per Hadron records) |
 
-Results from C cannot be used to claim anything about A.
+Results from C cannot be used to claim anything about A. Even a build with GS but without XFB stays at 2.1: 3.0 already requires transform feedback.
 
 ### Contribute
 

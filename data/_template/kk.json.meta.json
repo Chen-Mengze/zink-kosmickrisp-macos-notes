@@ -6,7 +6,7 @@
   "mr": "<!44928 head sha，若适用>",
   "date": "<YYYY-MM-DD>",
   "tester": "<可留空>",
-  "gl": "<3.1>",
+  "gl": "<2.1>",
   "gl_source": "<zink_check_requirements | MESA_GL_VERSION_OVERRIDE | 目测>",
   "samples": [
     {

@@ -3,7 +3,7 @@
 Goal: **on Mesa main + !44928, what GL version does Zink actually report on KosmicKrisp, and what is missing?**
 
 About 40 minutes. No graphics development experience required.
-The core steps do **not** launch a game or any GL application — `zink_check_requirements` computes the GL ceiling from the Vulkan capability table. Running an app is optional.
+The core steps do **not** launch a game or any GL application — `zink_check_requirements` queries the current Vulkan device and prints `Supported` / `UNSUPPORTED` per tier; the highest Supported tier is the GL ceiling. Running an app is optional.
 
 ---
 
@@ -21,21 +21,23 @@ This is a one-off measurement. Unset the environment afterwards and the system i
 
 ## 0.5 Check build A first (10 minutes, tool only, no KK build)
 
-Before touching KK, run the checker against the **stock SDK build**. It answers the open question: why does build A (Mesa 26.3.1), which lacks XFB, report GL 3.1?
+Before touching KK, run the checker against the **stock SDK build** to confirm A's ceiling. Expect 2.1, not 3.1:
 
-The Zink documentation attaches "some of these might not actually get verified" to **3.2 and 3.3**, while 3.0 is stated as "required to be exposed and fully supported". So there are three possibilities:
+- Zink's 3.0 tier requires `VK_EXT_transform_feedback` and `VK_EXT_conditional_rendering`, with no "only fails when used" qualifier;
+- !44928's description says adding it takes Zink on kk "from OpenGL 2.1 to 3.3 (ES 3.1)".
 
-- The checker lists XFB as missing, yet the driver reports 3.1 → the 3.0 check is not actually enforced.
-- The checker says XFB is present → the capability table in the notes is wrong, and the "two blockers" framing needs revision.
-- The checker reports 2.1 → the observation "A reports 3.1" needs re-verification.
+The 3.1 figure comes from an F3 screenshot that only shows the driver name; it has no GL version and cannot support the claim.
 
 ```bash
 meson setup build-tools . --buildtype=release -Dplatforms=macos -Dtools=zink
 ninja -C build-tools
+# the SDK's KK as the current driver; the tool takes no arguments
 ./build-tools/src/gallium/drivers/zink/check_requirements/zink_check_requirements
 ```
 
-No KK build, no special hardware. **Do this before spending 25 minutes on build B.**
+It prints `Supported` / `UNSUPPORTED` per `VP_ZINK_*` profile: expect `gl21` Supported and `gl30` UNSUPPORTED. It prints no version number and no missing-item table; the highest Supported tier is the ceiling.
+
+If `gl30` is also Supported, the SDK's KK already has XFB and the capability table needs changing. **Do this before spending 25 minutes on build B+.**
 
 ---
 
@@ -107,25 +109,26 @@ A count of 0 is a valid result — report it and skip to step 6.
 
 ---
 
-## 5. Compute the GL ceiling (the actual evidence)
+## 5. Read the GL ceiling (the actual evidence)
 
 ```bash
 meson setup build-zink . --buildtype=release -Dplatforms=macos -Dtools=zink
 ninja -C build-zink
 
-./build-zink/src/gallium/drivers/zink/check_requirements/zink_check_requirements --help
-
+# no arguments: enumerate the compiled-in profiles and check the current device
 ./build-zink/src/gallium/drivers/zink/check_requirements/zink_check_requirements \
-  > ~/kk-zink-requirements.txt 2>&1
+  | tee ~/kk-zink-requirements.txt
 ```
 
-Fallback:
+The output reads `Checking profile VP_ZINK_gl33_baseline` followed by `Supported` / `UNSUPPORTED physical device`. **The highest Supported tier is the GL ceiling**: `gl21` = 2.1, `gl30` = 3.0, `gl33` = 3.3, `gl46` = 4.6.
+
+It prints neither a version number nor a missing-item table. For missing items, compare `~/kk-xfb.json` against `VP_ZINK_requirements.json`, or run:
 
 ```bash
-vkprofiles --compare VP_ZINK_requirements.json ~/kk-xfb.json > ~/kk-diff.txt
+python tools/kkcap.py one ~/kk-xfb.json --md
 ```
 
-Record two things: the computed GL version, and whether the missing list contains `VK_EXT_transform_feedback` / `geometryShader`.
+**Record two things**: the highest Supported profile, and whether `VK_EXT_transform_feedback` / `geometryShader` appear in `vulkaninfo`.
 
 ---
 
@@ -136,7 +139,7 @@ Chip / macOS:        M1 Pro / 26.2
 Build:               mesa main @ <base commit>, MR !44928 head <sha>
 driverName / API:    KosmicKrisp / 1.4.xxx
 vulkaninfo XFB:      present | absent
-Zink GL version:     4.6 core | 3.1 | ...
+Zink GL ceiling:     3.3 | 2.1 | ... (highest Supported profile)
 Missing (hard):      <items>
 Missing (unchecked): <items>
 Crashes / validation errors: none | <short>
@@ -174,7 +177,7 @@ Detection runs in a static initializer: after installing KK, HMCL must be restar
 ### Order to try
 
 1. **JVM property first**: confirm MC is not on the Vulkan backend, add `-Dorg.lwjgl.opengl.libname=<absolute path to libGL.dylib>`.
-2. **Then interpose**: `DYLD_INSERT_LIBRARIES` plus a `dlsym` hook on `glGenBuffers` (the route the gist's nine problems took). Expect `NSViewBackingLayer` → `CAMetalLayer` replacement and `dispatch_sync_f()` on the main thread; not a ten-minute job.
+2. **Then interpose**: `DYLD_INSERT_LIBRARIES` plus a `dlsym` hook on `glGenBuffers` (the route the gist's ten problems took). Expect `NSViewBackingLayer` → `CAMetalLayer` replacement and `dispatch_sync_f()` on the main thread; not a ten-minute job.
 3. **Failing both is still a result.** Paste the error; don't change renderer behaviour to force it through.
 
 Press F3: the top-right must read KosmicKrisp. If it reads Apple, the run is a silent fallback and invalid.

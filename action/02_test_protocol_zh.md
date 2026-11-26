@@ -3,7 +3,7 @@
 目标只有一个：**在 Mesa main + !44928 上，Zink 到底能报到 GL 几？卡在哪一项？**
 
 40 分钟，不需要图形开发经验，会复制命令就行。
-核心步骤**不需要启动任何游戏或应用**——`zink_check_requirements` 直接从 `vulkaninfo` 的能力表算出 GL 天花板。跑应用是可选项。
+核心步骤**不需要启动任何游戏或应用**——`zink_check_requirements` 直接问当前 Vulkan 设备，逐档打 `Supported` / `UNSUPPORTED`，最高档就是 GL 天花板。跑应用是可选项。
 
 ---
 
@@ -21,22 +21,23 @@
 
 ## 0.5 先测构建 A（10 分钟，只编工具，不编 KK）
 
-在动 KK 之前，先用**现成的 SDK 版本**跑一次检查工具。它回答的是笔记里那个悬着的问题：构建 A（Mesa 26.3.1）没有 XFB，为什么能报 3.1？
+在动 KK 之前，先用**现成的 SDK 版本**跑一次检查工具，确认 A 的天花板。预期是 2.1，不是 3.1：
 
-Zink 官方文档把「some of these might not actually get verified」这句注记放在 **3.2 和 3.3**，而 3.0 写的是 "required to be exposed and fully supported"。所以三种可能：
+- Zink 的 3.0 档要求 `VK_EXT_transform_feedback` 和 `VK_EXT_conditional_rendering`，没有「用到才炸」的余地；
+- !44928 的描述也写明，加上它才 “from OpenGL 2.1 to 3.3 (ES 3.1)”。
 
-- checker 说 A 缺 XFB，实际却报 3.1 → 3.0 这一档的检查没有真正执行。
-- checker 说 A 不缺 XFB → 笔记里的能力表要改，「两个坑」的框架也要改。
-- checker 直接报 2.1 → 那么「A 报 3.1」这个观察本身要重新核对来源。
+3.1 这个数来自一张只显示驱动名的 F3 截图，截图里没有 GL 版本，不能作为证据。
 
 ```bash
 meson setup build-tools . --buildtype=release -Dplatforms=macos -Dtools=zink
 ninja -C build-tools
-# 用 SDK 的 KK 当当前驱动，直接跑
+# 用 SDK 的 KK 当当前驱动，直接跑；没有参数
 ./build-tools/src/gallium/drivers/zink/check_requirements/zink_check_requirements
 ```
 
-这一步不需要编 KK，也不需要 M 系以外的任何条件。**先做它，再决定要不要花 25 分钟编 B。**
+它会把 `VP_ZINK_*` profile 逐个打 `Supported` / `UNSUPPORTED`：预期 `gl21` Supported、`gl30` UNSUPPORTED。它不打印版本号，也不打印缺项；最高 Supported 的那档就是天花板。
+
+如果 `gl30` 也 Supported，说明 SDK 里的 KK 已经有 XFB，能力表要改。这一步不需要编 KK，**先做它，再决定要不要花 25 分钟编 B+。**
 
 ---
 
@@ -111,29 +112,26 @@ vulkaninfo | grep -E 'driverName|driverInfo|apiVersion'
 
 ---
 
-## 5. 算 GL 天花板（核心证据）
+## 5. 读 GL 天花板（核心证据）
 
 ```bash
 meson setup build-zink . --buildtype=release -Dplatforms=macos -Dtools=zink
 ninja -C build-zink
 
-# 先看用法，不同 Mesa 版本参数名不一样
-./build-zink/src/gallium/drivers/zink/check_requirements/zink_check_requirements --help
-
-# 按 help 的用法把 ~/kk-xfb.json 喂进去，或让它直接枚举当前 ICD
+# 不带参数：枚举编译进去的 profile，逐个对当前设备检查
 ./build-zink/src/gallium/drivers/zink/check_requirements/zink_check_requirements \
-  > ~/kk-zink-requirements.txt 2>&1
+  | tee ~/kk-zink-requirements.txt
 ```
 
-备用方案（如果有 Vulkan SDK 的 profiles 工具）：
+输出形如 `Checking profile VP_ZINK_gl33_baseline` 加 `Supported` / `UNSUPPORTED physical device`。**最高的 Supported 档就是 GL 天花板**：`gl21` = 2.1，`gl30` = 3.0，`gl33` = 3.3，`gl46` = 4.6。
+
+它不打印版本号，也不打印缺项表。要缺项就把 `~/kk-xfb.json` 和 `VP_ZINK_requirements.json` 对照，或先跑：
 
 ```bash
-vkprofiles --compare VP_ZINK_requirements.json ~/kk-xfb.json > ~/kk-diff.txt
+python tools/kkcap.py one ~/kk-xfb.json --md
 ```
 
-`VP_ZINK_requirements.json` 在 Mesa 源码的 zink 目录或文档页里。
-
-**要记下来的两件事**：算出来的 GL 版本号；missing 列表里有没有 `VK_EXT_transform_feedback` 和 `geometryShader`。
+**要记下来的两件事**：最高 Supported 的 profile；`VK_EXT_transform_feedback` 和 `geometryShader` 在不在 `vulkaninfo` 里。
 
 ---
 
@@ -144,7 +142,7 @@ Chip / macOS:        M1 Pro / 26.2
 Build:               mesa main @ <base commit>, MR !44928 head <sha>
 driverName / API:    KosmicKrisp / 1.4.xxx
 vulkaninfo XFB:      present | absent
-Zink GL version:     4.6 core | 3.1 | ...
+Zink GL ceiling:    3.3 | 2.1 | ...（最高 Supported profile）
 Missing (hard):      <逐项>
 Missing (unchecked): <逐项>
 Crashes / validation errors: none | <简述>
@@ -182,7 +180,7 @@ Crashes / validation errors: none | <简述>
 ### 试的顺序
 
 1. **先试 JVM 参数**：确认 MC 不是 Vulkan 后端，加 `-Dorg.lwjgl.opengl.libname=<libGL.dylib 绝对路径>`。
-2. **不行就上 interpose**：`DYLD_INSERT_LIBRARIES` + `dlsym` 钩 `glGenBuffers` 那套（Gist 的九问就是这么走通的）。这一步会碰到 `NSViewBackingLayer` → `CAMetalLayer` 的替换和主线程 `dispatch_sync_f()`，不是十分钟能搞定的。
+2. **不行就上 interpose**：`DYLD_INSERT_LIBRARIES` + `dlsym` 钩 `glGenBuffers` 那套（Gist 的十问就是这么走通的）。这一步会碰到 `NSViewBackingLayer` → `CAMetalLayer` 的替换和主线程 `dispatch_sync_f()`，不是十分钟能搞定的。
 3. **两步都失败也算结果**，把报错贴出来；不要为了跑通去改渲染器行为。
 
 进游戏后按 F3，右上角必须显示 KosmicKrisp；显示 Apple 就是静默降级，结果作废。

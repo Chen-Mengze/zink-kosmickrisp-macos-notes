@@ -4,24 +4,25 @@
 
 ## 一句话
 
-链路是通的，卡在两个能力位。现在的瓶颈不是研究，是**没有人在真机上把「Vulkan 能力表 / Zink 差集 / 实际 GL 版本」这三样东西在同一台机器上对齐过一次**。
+链路是通的，卡在最靠前的两个能力位：XFB 挡 3.0，GS 挡 3.2。现在的瓶颈不是研究，是**没有人在真机上把「Vulkan 能力表 / Zink 差集 / 实际 GL 版本」这三样东西在同一台机器上对齐过一次**。
 
 ## 公开数据现状
 
-| 构建 | 定义 | GS | XFB | 观测到的 GL | 来源与可信度 |
+| 构建 | 定义 | GS | XFB | 观测/推算的 GL | 来源与可信度 |
 |---|---|---|---|---|---|
-| A | SDK 1.4.363.1 / Mesa 26.3.1 | ✗ | ✗ | 3.1 | 社区 F3 截图；**与官方文档矛盾，待复核** |
-| B | main + `14f59d06` | ✓ | ✗ | 无公开数据 | 空白 |
+| A | SDK 1.4.363.1 内置 KK（Mesa 26.3.0-devel）；截图里是 Homebrew Mesa 26.3.1 | ✗ | ✗ | 2.1 | !44928 描述 + Zink 3.0 档硬要求 XFB；F3 截图只证明驱动名，不含 GL 版本 |
+| B | main + `14f59d06` | ✓ | ✗ | 2.1 | 同上；实机数据仍为零 |
+| B+ | main + `14f59d06` + !44928 | ✓ | ✓ | 3.3（作者口径） | !44928 描述：“from OpenGL 2.1 to 3.3 (ES 3.1)”；待实机复核 |
 | C | main + Hadron 0038–0083 | ✓ | ✓ | 4.6 | Hadron findings + CTS 15,304 pass / 1 fail |
 
-A 的矛盾写清楚：Zink 文档把 `VK_EXT_transform_feedback` 列为 GL 3.0 的 **required and fully supported**，但 A 没有 XFB 却报 3.1。要么这一档的检查没执行，要么能力表填错了。见 `action/06_note_revisions_zh.md` 第 1 条。
+之前表里 A 写 3.1，是转述时加上去的：那张 F3 截图只有 `Vulkan 1.4.363` / `Mesa 26.3.1`，没有 GL 版本。按 Zink 3.0 档的要求，没有 `VK_EXT_transform_feedback` 连 3.0 都过不去，所以 A 和 B 都停在 2.1；!44928 作者自己写的也是「加上它才从 2.1 到 3.3」。这条更正同时说明：只带 GS 的包不会抬高版本号。
 
 ## 待办（按顺序，每条都有判据）
 
 1. **10 分钟复核构建 A** — 不需要编 KK，只编 `-Dtools=zink`，用现成 SDK 的 KK 跑 `zink_check_requirements`。
-   判据：输出里 XFB 在不在 missing；实际报的版本号。三条分支见 `action/02_test_protocol_zh.md` 第 0.5 节。
-2. **40 分钟测构建 B** — 叠 !44928，出 `vulkaninfo --json` + 差集。
-   判据：GL 能不能过 3.2；不能的话缺哪一项。
+   判据：`VP_ZINK_gl21_baseline` Supported、`VP_ZINK_gl30_baseline` UNSUPPORTED。若 3.0 也 Supported，说明 SDK 里已经有 XFB，能力表要改。
+2. **40 分钟测构建 B+** — 叠 !44928（head `e56f2e43`），出 `vulkaninfo --json` 和逐档结果。
+   判据：GL 能不能到 3.3；不能的话缺哪一项。B（只有 GS、没有 XFB）预期仍是 2.1。
 3. **光影包定性** — 用 `tools/packscan.py` 扫目标 pack，得到 HARD / SOFT / NONE。
    判据：至少两个 SSPT/体素类 pack + 一个真 GS 负载，硬依赖占比是多少。
 4. **上游问询** — 把 1、2 的结果贴到 !44928，并问 12 月中 SDK 是否含 `14f59d06`。
@@ -34,8 +35,8 @@ A 的矛盾写清楚：Zink 文档把 `VK_EXT_transform_feedback` 列为 GL 3.0 
 | 人 / 项目 | 已有的东西 | 缺的东西 |
 |---|---|---|
 | Junmin Lee | GS，!44786 已合，`14f59d06` | — |
-| Willie Abrams | XFB，!44928 draft | 真机验证结果与回帖 |
-| Hadron | GL 4.6 + 19,714 项 CTS 里 15,304 pass / 1 fail | 补丁公开、口径说明、上游化路径 |
+| Willie Abrams | XFB，!44928 待评审（head `e56f2e43`） | 真机验证结果与回帖 |
+| Hadron | GL 4.6 + 19,714 项 CTS 里 15,304 pass / 1 fail；补丁已在公开仓库的 `patches/mesa` | 哪些补丁能上游、跨机型复现 |
 | squidbus | M4 Max 上 GS 全量 CTS 零失败 | — |
 | Aitor Camacho (LunarG) | M5 Pro / macOS 27 的 float16 失败样本 | M1/M2 数据、复现确认 |
 | pauyedin | 可跑 kit + 缓存/闪烁补丁 | 通用化（去掉具体应用假设） |
@@ -56,7 +57,7 @@ A 的矛盾写清楚：Zink 文档把 `VK_EXT_transform_feedback` 列为 GL 3.0 
 提前写死，避免沉没成本：
 
 - 目标负载**全是** GS 硬依赖，而 XFB 长期没有上游路径；
-- 或者 B 构建在 M1/M2、M3/M4、M5/M6 三类上都报不回 3.2 以上。
+- 或者 B+（叠了 !44928）在 M1/M2、M3/M4、M5/M6 三类上都报不回 3.2 以上。
 
 命中任一条，就关掉实施分支，只保留调查结论和上游票。
 

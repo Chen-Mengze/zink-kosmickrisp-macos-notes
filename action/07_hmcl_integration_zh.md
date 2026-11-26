@@ -106,9 +106,9 @@ if (options.getRenderer() == Renderer.OpenGL.ZINK) {
 
 Open prerequisite: whether Homebrew's mesa ships a `libGL.dylib` usable by Zink is unverified. If not, the path must point at a self-built artifact (the build in protocol section 3).
 
-边界：启动器只能解决「库指向」和「环境变量」。GL 上下文与 surface 的整合（`NSViewBackingLayer` → `CAMetalLayer`）仍在应用或驱动一侧，Gist 里那九个问题不会因为改了 HMCL 就消失。
+边界：启动器只能解决「库指向」和「环境变量」。GL 上下文与 surface 的整合（`NSViewBackingLayer` → `CAMetalLayer`）仍在应用或驱动一侧，Gist 里那十个问题不会因为改了 HMCL 就消失。
 
-Boundary: a launcher can only fix “which library” and “which variables”. GL context and surface integration (`NSViewBackingLayer` → `CAMetalLayer`) remains on the application or driver side; the gist's nine problems do not disappear because HMCL changed.
+Boundary: a launcher can only fix “which library” and “which variables”. GL context and surface integration (`NSViewBackingLayer` → `CAMetalLayer`) remains on the application or driver side; the gist's ten problems do not disappear because HMCL changed.
 
 ## 6. 三个顺手的小 PR | Three small PRs
 

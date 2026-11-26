@@ -21,14 +21,14 @@
 |---|---|
 | `STATUS.md` | 状态表：公开数据现状、待办、谁手里有什么、什么时候该停 |
 | `INDEX.md` | 本文件 |
-| `FAQ.md` | 九个最常被问的问题，含「为什么 GL 4.6 有三种说法」 |
-| 正文（中/英） | 工程笔记本体，2026-11-26 口径 |
+| `FAQ.md` | 十个最常被问的问题，含「为什么 GL 4.6 有三种说法」 |
+| 正文（中/英） | 工程笔记本体，2026-11-27 修订口径；文末有「更正记录」 |
 | `action/01_upstream_ask_en.md` | 20 行英文，贴 !44928 用 |
 | `action/02_test_protocol_zh.md` | 中文，10 分钟 / 40 分钟两档 |
 | `action/03_test_protocol_en.md` | 英文同上 |
 | `action/04_call_for_testers_zh.md` | 中文发帖正文 |
 | `action/05_acceptance_criteria_zh.md` | 四列判据、性能第二轨、口径铁律、成立/停止条件 |
-| `action/06_note_revisions_zh.md` | 正文 v2 要改的七处 |
+| `action/06_note_revisions_zh.md` | 正文 v2 要改的八处（第 1 条已按 2026-11-27 的一手数据定案） |
 | `action/07_hmcl_integration_zh.md` | HMCL 里 KosmicKrisp / Zink 的确切代码位置、检测条件、缺口与改动点 |
 | `tools/kkcap.py` | `vulkaninfo --json` → 记录行 / 矩阵 / diff |
 | `tools/packscan.py` | 光影包 → HARD / SOFT / SUSPECT / NONE |

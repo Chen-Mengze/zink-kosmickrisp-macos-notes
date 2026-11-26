@@ -6,13 +6,13 @@ Only the shortest quotes needed to verify the conclusions. Page text belongs to 
 
 ---
 
-## Page status and the framing sentence
+## Page status and counts (checked against the GitLab API)
 
 ```text
 Merged
 kk: Add geometry shader support
 Junmin Lee requested to merge junminlee2004/mesa:kk-geometry into main
-40 commits / 6 pipelines / 15 reports
+6 commits / 15 pipelines / 40 comments
 ```
 
 > "This MR adds geometry shader support to the KosmicKrisp Vulkan driver
@@ -30,6 +30,8 @@ Changes from 14f59d06 merged into main.
 Aitor Camacho assigned to @marge-bot
 Marge Bot merged
 ```
+
+Counts: commits, pipelines and comments were checked against the GitLab API on 2026-11-27 (6 / 15 / 40). 14f59d06 is the source-branch head; the merge was a fast-forward, with no separate merge commit.
 
 Key commit titles from the final push (factual information):
 

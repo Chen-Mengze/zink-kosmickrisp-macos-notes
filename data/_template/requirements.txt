@@ -1,2 +1,2 @@
-把 zink_check_requirements 或 vkprofiles --compare 的原始输出整段贴在这里，不要删行。
+把 zink_check_requirements 的逐档输出整段贴在这里（每个 VP_ZINK_* profile 一行 Supported / UNSUPPORTED），不要删行。
 没有就写：未运行，原因：<...>

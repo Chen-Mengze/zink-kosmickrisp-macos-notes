@@ -34,9 +34,9 @@ python kkcap.py selftest
 
 ### 它不做什么（重要）
 
-- **不计算 GL 版本。** 算版本是 `zink_check_requirements` 的事；这个工具只整理证据。门槛表是筛选过的子集，不是 Zink 要求的全集。
-- **不检查 format 和 limit。** 这两类要靠真正的 profile 比对（`vkprofiles --compare`）。
-- 门槛表里的 `unknown` 类是**故意留的**：`VK_EXT_transform_feedback` 和 `shaderFloat64` 现在口径未定，标成确定的反而会误导。
+- **不判档位。** 判档位是 `zink_check_requirements` 的事（逐档 Supported / UNSUPPORTED）；这个工具只整理证据。门槛表是筛选过的子集，不是 Zink 要求的全集。
+- **不检查 format 和 limit。** 这两类要靠真正的 profile 比对（拿 `VP_ZINK_requirements.json` 对 `vulkaninfo`，或看 `zink_check_requirements` 的逐档 Supported）。
+- 门槛表里的 `unknown` 类是**故意留的**：`shaderFloat64` 现在口径未定（Playport 0087 记过，但当前 `gl40` profile 没列），标成确定的反而会误导。XFB 已按 3.0 硬门槛归类。
 
 ---
 

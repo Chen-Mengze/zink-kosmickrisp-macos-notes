@@ -20,11 +20,11 @@
 |---|---|---|
 | Mesa / GitLab !44786、!44928 | MR 描述定调句、合并时间、提交标题、几条讨论短句 | https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/44786 、https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/44928 |
 | Mesa 文档、release notes、release calendar | Zink 逐档需求、分支切割日期、26.3.1 `New features: None` | https://docs.mesa3d.org/drivers/zink.html 、https://mesa3d.org/release-calendar.html |
-| LunarG / Khronos | KK 定位、1.4 conformance、bundle 布局、MVK 弃用 | https://www.lunarg.com/products/kosmickrisp 、https://www.khronos.org/news/archives/kosmickrisp-achieves-vulkan-1.4-conformance-on-apple-silicon |
+| LunarG / Khronos | KK 定位、1.4 conformance、bundle 布局、MVK 弃用 | https://www.lunarg.com/products/kosmickrisp 、https://www.khronos.org/news/archives/kosmickrisp-achieves-vulkan-1.4-conformance-on-apple-silicon 、https://www.khronos.org/blog/from-portability-to-conformance-a-new-chapter-for-layered-vulkan-on-apple |
 | Blender 开发者门户 | macOS 上的 GS limitation、实验性定位 | https://developer.blender.org/docs/features/gpu/vulkan/kosmic_krisp |
-| Mojira MC-311557、Minecraft Feedback | 结构性问题与社区提议的时间点 | https://bugs.mojang.com/browse/MC/issues/MC-311557 、https://feedback.minecraft.net/hc/en-us/community/posts/44920984456717-Using-kosmickrisp-instead-of-moltenvk-for-vulkan-in-macos |
-| GitHub Gist《Running Minecraft on macOS with Zink + KosmicKrisp》 | 九个 debug 问题的结论、70fps、2–3% | 原文见该 Gist，正文只作事实转述 |
-| Hadron `findings.md` / conformance 记录、Playport 0087 / 0093 | 0038–0083 的编号与结论、CTS 数字、fans/quads 的收益 | 各项目仓库，正文只作事实转述 |
+| Mojira MC-311557、Minecraft Feedback | 结构性问题与社区提议的时间点 | https://bugs.mojang.com/browse/MC-311557 、https://feedback.minecraft.net/hc/en-us/community/posts/44920984456717-Using-kosmickrisp-instead-of-moltenvk-for-vulkan-in-macos |
+| GitHub Gist《Running Minecraft on macOS with Zink + KosmicKrisp》 | 十个 debug 问题的结论、70fps、2–3% | https://gist.github.com/lucamignatti/5312f5e937de2ba44256ecba6de54cc2 ；正文只作事实转述 |
+| Hadron `findings.md` / conformance 记录、Playport 0087 / 0093 | 0038–0083 的编号与结论、CTS 数字、fans/quads 的收益 | https://github.com/IvanKarpan/hadron 、https://github.com/playportdev/playport ；正文只作事实转述 |
 | `pauyedin/kosmickrisp-minecraft-macos`、steamac | 缓存 key 口径、0001–0003/0021、63 补丁 | https://gitlab.com/pauyedin/kosmickrisp-minecraft-macos/-/tree/main 等 |
 | HMCL 维护者 [Glavo](https://github.com/Glavo) 提供的 F3 截图 | 确认实际驱动名、机型与画面状态（`evidence/screenshot_M6_F3_KosmicKrisp.jpg`）；该 KK 后端由 HMCL 提供开启入口，需先经包管理器安装 KK 才显示并允许切换 | https://github.com/Glavo 、https://glavo.site/about/ ；画面版权归各自权利人 |
 
