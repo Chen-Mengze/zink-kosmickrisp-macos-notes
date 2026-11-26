@@ -58,7 +58,7 @@ GL 应用 / 光影 / 模组
 | **B+** | B 再叠 !44928（head `e56f2e43`） | ✓ | ✓ | 3.3（!44928 作者口径，待实机复核） |
 | **C** | main + Hadron 0038–0083 补丁 | ✓ | ✓ | 4.6（Hadron 记录） |
 
-C 的结果不能拿去说 A 支持什么。另一个容易看岔的：B+ 的 3.3 仍低于 macOS 原生 GL 4.1，只有 C 的 4.6 越过原生栈。这两条同时写进正文、能力声明和回传模板。
+C 的结果不能拿去说 A 支持什么。另一个容易看岔的：B+ 的 3.3 仍低于 macOS 系统 GL 4.1，只有 C 的 4.6 越过系统 GL 栈。这两条同时写进正文、能力声明和回传模板。
 
 补一句容易看岔的：Mesa 的 feature release 在第一个 RC 那天就从 main 切了分支，GS 是 10-29 合的、26.3.1 是 11-18 发的，看着像赶上了，其实没进。所以「装了最新 KK 就有 GS」目前不成立。退一步说，就算装到带 GS 的构建，GL 也还是 2.1——3.0 先要求 XFB，3.2 才轮到 GS。
 
@@ -124,7 +124,7 @@ The author has no Mac and has never written a Mesa driver. Everything here is as
 | **B+** | B plus !44928 (head `e56f2e43`) | yes | yes | 3.3 (per the !44928 author; to be confirmed on hardware) |
 | **C** | main + Hadron patches 0038–0083 | yes | yes | 4.6 (per Hadron records) |
 
-Results from C cannot be used to claim anything about A. The other easy misread: B+'s 3.3 is still below native macOS GL 4.1; only C's 4.6 gets past the native stack. Even a build with GS but without XFB stays at 2.1: 3.0 already requires transform feedback.
+Results from C cannot be used to claim anything about A. The other easy misread: B+'s 3.3 is still below macOS system GL 4.1; only C's 4.6 gets past the system GL stack. Even a build with GS but without XFB stays at 2.1: 3.0 already requires transform feedback.
 
 ### Contribute
 

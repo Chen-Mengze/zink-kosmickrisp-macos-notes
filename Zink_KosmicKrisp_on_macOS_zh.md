@@ -16,9 +16,11 @@
 
 ## 起因
 
-苹果的 OpenGL 从 2013 年起停在 4.1，2018 年标了 deprecated。原生栈有 3.2/4.0 那批东西（geometry、transform feedback、tessellation、indirect draw；M1 的 4.1 扩展表里能查到 `GL_EXT_geometry_shader4` 和 `GL_EXT_transform_feedback`），但 GL 4.2 起的 image load/store、atomic counters，以及 4.3 的 compute、SSBO 都没有。同一块芯片 Asahi Linux 已经能报 GL 4.6，问题在驱动。
+先厘清一个词：本文说「系统 GL」或「自带 GL」，指 macOS 的 OpenGL.framework，**不是硬件原生驱动**。Apple Silicon 上没有原生 OpenGL 驱动；版本串直接写 `4.1 Metal - ...`，即 Apple 自己的 GL 实现跑在 Metal 之上。
 
-受影响的远不止游戏。Blender 开发者门户有一页 KosmicKrisp，5.1 起能跑，逐条列着 limitation：GS 不支持、shader 有时编译失败、`setup-env.sh` 默认配的还是 MoltenVK 得手动改 `VK_DRIVER_FILES`。页面上注了一句，这是给开发者在同一台机器上切 Metal/Vulkan 用的便利选项，没打算进正式发行。光影包这边，OptiFine 在 macOS 只有 8 个 color attachment，Iris 能用到全部 16 个 buffer；真正卡住 Iris 的是 4.3 的 compute/SSBO 那一批。做光影的人说 GS 对体素相关着色器基本是必需的；原生 GL 4.1 本身有 GS，所以 GS 不是原生栈的缺口。
+苹果的 OpenGL 从 2013 年起停在 4.1，2018 年标了 deprecated。系统 GL 栈有 3.2/4.0 那批东西（geometry、transform feedback、tessellation、indirect draw；M1 的 4.1 扩展表里能查到 `GL_EXT_geometry_shader4` 和 `GL_EXT_transform_feedback`），但 GL 4.2 起的 image load/store、atomic counters，以及 4.3 的 compute、SSBO 都没有。同一块芯片 Asahi Linux 已经能报 GL 4.6，问题在驱动。
+
+受影响的远不止游戏。Blender 开发者门户有一页 KosmicKrisp，5.1 起能跑，逐条列着 limitation：GS 不支持、shader 有时编译失败、`setup-env.sh` 默认配的还是 MoltenVK 得手动改 `VK_DRIVER_FILES`。页面上注了一句，这是给开发者在同一台机器上切 Metal/Vulkan 用的便利选项，没打算进正式发行。光影包这边，OptiFine 在 macOS 只有 8 个 color attachment，Iris 能用到全部 16 个 buffer；真正卡住 Iris 的是 4.3 的 compute/SSBO 那一批。做光影的人说 GS 对体素相关着色器基本是必需的；系统 GL 4.1 本身有 GS，所以 GS 不是系统 GL 栈的缺口。
 
 MC Java 只是手上最方便的样本。26.2 的快照窗口里原生 Vulkan 曾是默认，26.2 正式版又切回 OpenGL；Iris 本体仍是 OpenGL-only，官方目前把 Apple Silicon 列为不支持（驱动崩溃），依赖 GL 4.x 的光影没有第二条路。走 GL 路径还覆盖早期没有原生后端的版本。默认值以实机 `options.txt` 和 F3 为准，HMCL 代码里的建模只是旁证。
 
@@ -57,7 +59,7 @@ GL 应用 / 光影 / 模组
 
 能力是 Zink 按底层 Vulkan feature 逐项 gate 出来的；`VP_ZINK_requirements.json` 把这些要求按 GL 版本整理成 profile，给 `zink_check_requirements` 用。查询方是 Zink 和 GLSL 负载，不是上层应用那份 Vulkan 扩展白名单。
 
-这两个坑是 **Zink 链的坑，不是原生 GL 的坑**：原生 GL 4.1 有 GS 和 XFB，但没有 4.2+ 的 image/atomic、4.3 的 compute/SSBO。Zink 要从 2.1 爬到 4.x，先得补 3.0/3.2，再补 4.0 的格式位；这三步都过了，才谈得上越过原生 4.1。
+这两个坑是 **Zink 链的坑，不是系统 GL 的坑**：系统 GL 4.1 有 GS 和 XFB，但没有 4.2+ 的 image/atomic、4.3 的 compute/SSBO。Zink 要从 2.1 爬到 4.x，先得补 3.0/3.2，再补 4.0 的格式位；这三步都过了，才谈得上越过系统 GL 4.1。
 
 通用做法是把 loader 和 KK 的 ICD 打进应用包，进程里设 `VK_DRIVER_FILES`（或 `VK_ICD_FILENAMES`），GL 侧 `MESA_LOADER_DRIVER_OVERRIDE=zink` 加自带的 `libGL` / `libEGL`。LunarG 十月那篇把目录画好了：`Contents/Frameworks/` 放 dylib，`Contents/Resources/vulkan/icd.d/` 放 json，`library_path` 写 `"../../../Frameworks/libvulkan_kosmickrisp.dylib"`，并说不推荐把 loader 装到 `/usr/local/lib`。pauyedin 那个仓库是现成可跑的 kit。这层不用另设计。
 
@@ -124,10 +126,10 @@ MR !44786（`kk: Add geometry shader support`，Junmin Lee）2026-10-29 22:39 GM
 
 - **A**：SDK 1.4.363.1 里的 KK（Mesa 26.3.0-devel），或 Homebrew Mesa 26.3.1。对外承诺基线，`geometryShader` 和 XFB 都没有，GL 2.1（按 !44928 作者口径推算）。
 - **B**：Mesa main 自编译（含 `14f59d06`）。GS 有，XFB 没有，注明 commit；GL 仍是 2.1（同上）。
-- **B+**：B 再叠 !44928。GS 和 XFB 都有，作者口径 3.3。仍低于 macOS 原生 GL 4.1。
+- **B+**：B 再叠 !44928。GS 和 XFB 都有，作者口径 3.3。仍低于 macOS 系统 GL 4.1。
 - **C**：Mesa main 加 Hadron 0038–0083 系列补丁。GS 和 XFB 都有，报 GL 4.6。这套有 `findings.md`、CTS 脚本、owner 决策记录和「故意留给 alpha」清单，是正式工程记录，只是没进 SDK 发布线。
 
-C 的结果不能拿去说 A 支持什么。另一个容易看岔的：B+ 的 3.3 仍低于原生 GL 4.1，这条链要真正超过原生栈，得走到 C。这两条都写进文档、能力声明和回传模板。
+C 的结果不能拿去说 A 支持什么。另一个容易看岔的：B+ 的 3.3 仍低于系统 GL 4.1，这条链要真正超过系统 GL 栈，得走到 C。这两条都写进文档、能力声明和回传模板。
 
 已知瑕疵：Aitor 在 M5 Pro / macOS 27 上见 `dEQP-VK.spirv_assembly.instruction.graphics.float16.logical_nan.opfordequal_vector_geom` 失败，判断是 M3-4 上没有的 Metal 编译器 bug，当时 M1 还没跑。另有一组 CTS 超时用例拟另提 spec/CTS issue，合并前内部 CI 先 skip。GS 是拆成 compute 计数 + 光栅化 VS 展开两遍，帧时间形态和原生 GS 不一样。
 

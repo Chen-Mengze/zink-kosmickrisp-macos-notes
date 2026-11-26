@@ -2,7 +2,7 @@
 
 **Where this stands.** `geometryShader` landed in `14f59d06` (!44786). `VK_EXT_transform_feedback` is still unmerged (!44928, open, head `e56f2e43`). Zink requires XFB at 3.0 and GS at 3.2, so a GS-only build is still GL 2.1; with both, the MR author reports 3.3.
 
-**Why anyone should care.** macOS has been stuck at OpenGL 4.1 since 2013; the native stack has geometry shaders and transform feedback, but not the GL 4.2+ image/atomic features or the GL 4.3 compute/SSBO features that modern shaderpacks use. `Zink -> KosmicKrisp -> Metal 4` is the only open path past that ceiling on Apple Silicon. The two nearest gaps are capability bits: GS is in main, a third-party patch set reports GL 4.6 with 15,304 of 19,714 Khronos GL CTS tests passing (1 fail), and `zink_check_requirements` (!36061) checks every profile tier mechanically. Beyond those bits, 4.x still needs the Hadron patch set.
+**Why anyone should care.** macOS has been stuck at OpenGL 4.1 since 2013; the system GL stack (Apple's OpenGL.framework, running on top of Metal) has geometry shaders and transform feedback, but not the GL 4.2+ image/atomic features or the GL 4.3 compute/SSBO features that modern shaderpacks use. `Zink -> KosmicKrisp -> Metal 4` is the only open path past that ceiling on Apple Silicon. The two nearest gaps are capability bits: GS is in main, a third-party patch set reports GL 4.6 with 15,304 of 19,714 Khronos GL CTS tests passing (1 fail), and `zink_check_requirements` (!36061) checks every profile tier mechanically. Beyond those bits, 4.x still needs the Hadron patch set.
 
 The user-facing path is wired too: HMCL already ships a conditional KosmicKrisp toggle that appears once KK is installed through a package manager. What it lacks is a package worth toggling on.
 

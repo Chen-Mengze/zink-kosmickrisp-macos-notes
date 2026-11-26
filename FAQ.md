@@ -4,7 +4,7 @@
 
 Khronos 在 2026-11-25 弃用了 MoltenVK，同时收掉 Portability Initiative，`VK_KHR_portability_subset` 要从 spec 和 headers 里删掉，MVK 不再有新扩展。KosmicKrisp 是 Mesa 主线里的驱动，Vulkan 1.4 conformant，走 Metal 4，不需要 portability 那一套。
 
-更实际的一条：**MVK 没有 `geometryShader`**，所以 Zink-on-MVK 到不了 GL 3.2。但 macOS 原生 GL 4.1 本身是带 GS 的（3.2 core 起就有），所以「macOS 没有 GS」只对 MVK / 这条 Zink 链成立，对原生 GL 不成立。
+更实际的一条：**MVK 没有 `geometryShader`**，所以 Zink-on-MVK 到不了 GL 3.2。但 macOS 系统 GL 4.1（Apple 的 OpenGL.framework，跑在 Metal 之上）本身是带 GS 的（3.2 core 起就有），所以「macOS 没有 GS」只对 MVK / 这条 Zink 链成立，对系统 GL 不成立。
 
 MVK 仍然适用于 Intel Mac 和 macOS 26 以前的系统。
 

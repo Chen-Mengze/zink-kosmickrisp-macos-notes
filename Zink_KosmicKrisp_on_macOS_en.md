@@ -16,9 +16,11 @@ The text and my own analysis are released under **CC BY 4.0**: repost, split, re
 
 ## Why this came up
 
-Apple's OpenGL has been frozen at 4.1 since 2013 and was deprecated in 2018. The native stack has the 3.2/4.0 features — geometry shaders, transform feedback, tessellation, indirect draw (the M1 4.1 extension dump lists `GL_EXT_geometry_shader4` and `GL_EXT_transform_feedback`) — but not the 4.2 image/atomic features or the 4.3 compute/SSBO features. The same silicon reports GL 4.6 under Asahi Linux, so the problem is the driver, not the hardware.
+Terminology: “system GL” means macOS's OpenGL.framework, **not a hardware-native driver**. There is no native OpenGL driver on Apple Silicon; the version string reads `4.1 Metal - ...`, i.e. Apple's GL implementation runs on top of Metal.
 
-It isn't only games. The Blender developer portal has a KosmicKrisp page: it runs from 5.1 and lists limitations one by one — GS unsupported, shaders sometimes failing to compile, `setup-env.sh` still defaulting to MoltenVK so you have to set `VK_DRIVER_FILES` by hand. The page explicitly says this is a convenience for developers switching between Metal and Vulkan on one machine, not something intended for official releases. On the shaderpack side, OptiFine gets only 8 color attachments on macOS; Iris can use all 16 buffers. What actually stops Iris is the GL 4.3 compute/SSBO set. Shaderpack authors say GS is effectively required for voxel-related shaders; native GL 4.1 does have GS, so GS is not the native-stack gap.
+Apple's OpenGL has been frozen at 4.1 since 2013 and was deprecated in 2018. The system GL stack has the 3.2/4.0 features — geometry shaders, transform feedback, tessellation, indirect draw (the M1 4.1 extension dump lists `GL_EXT_geometry_shader4` and `GL_EXT_transform_feedback`) — but not the 4.2 image/atomic features or the 4.3 compute/SSBO features. The same silicon reports GL 4.6 under Asahi Linux, so the problem is the driver, not the hardware.
+
+It isn't only games. The Blender developer portal has a KosmicKrisp page: it runs from 5.1 and lists limitations one by one — GS unsupported, shaders sometimes failing to compile, `setup-env.sh` still defaulting to MoltenVK so you have to set `VK_DRIVER_FILES` by hand. The page explicitly says this is a convenience for developers switching between Metal and Vulkan on one machine, not something intended for official releases. On the shaderpack side, OptiFine gets only 8 color attachments on macOS; Iris can use all 16 buffers. What actually stops Iris is the GL 4.3 compute/SSBO set. Shaderpack authors say GS is effectively required for voxel-related shaders; system GL 4.1 does have GS, so GS is not the system GL gap.
 
 Minecraft Java is just the handiest sample. Native Vulkan was the default only in the 26.2 snapshot window; the 26.2 release switched back to OpenGL. Iris itself remains OpenGL-only, and its docs currently list Apple Silicon as unsupported (driver crashes), so GL 4.x-dependent shaderpacks have no second path. The GL path also covers older versions with no native backend at all. Take the actual default from `options.txt` and F3; HMCL's modelling is only a cross-check.
 
@@ -57,7 +59,7 @@ GL app / shaderpack / mod
 
 Capabilities are gated by Zink on individual Vulkan features; `VP_ZINK_requirements.json` packages those requirements into per-GL-version profiles for `zink_check_requirements`. The querying party is Zink and the GLSL workload, not the application's own Vulkan extension whitelist.
 
-These two pits are **pits in the Zink chain, not in native GL**: native GL 4.1 has GS and XFB, but not the 4.2+ image/atomic features or the 4.3 compute/SSBO features. For Zink to climb from 2.1 to 4.x it must first add 3.0/3.2, then the 4.0 format bits; only after those three steps does it get past native 4.1.
+These two pits are **pits in the Zink chain, not in system GL**: system GL 4.1 has GS and XFB, but not the 4.2+ image/atomic features or the 4.3 compute/SSBO features. For Zink to climb from 2.1 to 4.x it must first add 3.0/3.2, then the 4.0 format bits; only after those three steps does it get past system GL 4.1.
 
 The generic approach is to ship the loader and the KK ICD inside the app bundle, set `VK_DRIVER_FILES` (or `VK_ICD_FILENAMES`) per process, and on the GL side use `MESA_LOADER_DRIVER_OVERRIDE=zink` with bundled `libGL` / `libEGL`. LunarG's October write-up already draws the layout: dylibs in `Contents/Frameworks/`, json in `Contents/Resources/vulkan/icd.d/`, `library_path` as `"../../../Frameworks/libvulkan_kosmickrisp.dylib"`, and explicitly advises against installing the loader into `/usr/local/lib`. pauyedin's repo is a working kit. No need to design this layer from scratch.
 
@@ -127,7 +129,7 @@ Keep three build variants (with B split into B and B+, the latter plus !44928), 
 - **B+**: B plus !44928. GS and XFB both present, GL 3.3 per the MR author. Still below native macOS GL 4.1.
 - **C**: Mesa main plus the Hadron 0038–0083 patch series. GS and XFB both present, reports GL 4.6. This is a proper engineering record with `findings.md`, CTS scripts, owner decisions and a "deliberately left for alpha" list — just not on the SDK release line.
 
-**Results from C must not be used to claim what A supports.** The other easy misread: B+'s 3.3 is still below native GL 4.1; the chain only gets past the native stack at C. Both go in the document, the capability statement and the report template.
+**Results from C must not be used to claim what A supports.** The other easy misread: B+'s 3.3 is still below system GL 4.1; the chain only gets past the system GL stack at C. Both go in the document, the capability statement and the report template.
 
 Known blemish: Aitor saw `dEQP-VK.spirv_assembly.instruction.graphics.float16.logical_nan.opfordequal_vector_geom` fail on M5 Pro / macOS 27, judged to be a Metal compiler bug absent on M3-4; M1 hadn't been run at the time. A separate group of CTS timeout cases was going to get its own spec/CTS issue, skipped in internal CI before the merge. Newer machines can't be assumed clean. GS is split into a compute pass that counts outputs and a rasterization VS that expands them, so the shader runs twice and frame-time shape differs from native GS.
 
