@@ -4,7 +4,7 @@
 
 Khronos 在 2026-11-25 弃用了 MoltenVK，同时收掉 Portability Initiative，`VK_KHR_portability_subset` 要从 spec 和 headers 里删掉，MVK 不再有新扩展。KosmicKrisp 是 Mesa 主线里的驱动，Vulkan 1.4 conformant，走 Metal 4，不需要 portability 那一套。
 
-更实际的一条：**MVK 没有 geometryShader**。而 macOS 原生 GL 也从 3.2 core profile 起就没带过 GS。所以「GS 在 macOS 上从来没有存在过」这句话，对原生 GL、对 MVK 都成立。
+更实际的一条：**MVK 没有 `geometryShader`**，所以 Zink-on-MVK 到不了 GL 3.2。但 macOS 原生 GL 4.1 本身是带 GS 的（3.2 core 起就有），所以「macOS 没有 GS」只对 MVK / 这条 Zink 链成立，对原生 GL 不成立。
 
 MVK 仍然适用于 Intel Mac 和 macOS 26 以前的系统。
 
@@ -76,7 +76,7 @@ GS 已合（Junmin Lee，!44786），XFB 待评审（Willie Abrams，!44928，he
 
 三种帮法，按成本排：
 
-1. **10 分钟**（工具已就绪）：在现成 SDK 上跑一次检查工具，确认 A 停在 2.1（协议第 0.5 节）；从零编工具另加 20–40 分钟。
+1. **10 分钟**（工具已就绪）：在现成 SDK 上跑一次检查工具，确认 3.0 的硬门槛没过（`gl30` UNSUPPORTED）；2.1 的实际版本另跑一次 GL 应用确认（协议第 0.5 节）。从零编工具另加 20–40 分钟。
 2. **1–2 小时**：完整跑一遍构建 B+，交一份 `vulkaninfo` + 逐档结果（协议正文；首次编 KK 偏上限）。
 3. **不定时**：如果你写光影，告诉我你的 pack 里 GS 是硬依赖还是软依赖（`tools/packscan.py` 能先给个初判）。
 

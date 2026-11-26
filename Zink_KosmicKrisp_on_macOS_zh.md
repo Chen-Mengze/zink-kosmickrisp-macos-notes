@@ -8,7 +8,7 @@
 
 公开这份笔记是想找三类人：手上有 Apple Silicon 机器、愿意按附录 C 回传一份 `vulkaninfo` 和固定样本结果的；写光影包、能说清自己那个 pack 里的 GS 是硬依赖还是软依赖的；以及下面列到的那几份材料的作者——如果哪条转述错了、或者愿意把各自的 findings 互相挂个链接，直接在原仓库或这里指出就行。不要求谁加入什么项目，也不需要统一口径，各做各的、把结果放回公开处就够。
 
-结论：链路是通的，当前发布版还不能当开箱功能发。最靠前的两个门槛是 `geometryShader` 与 transform feedback 没进 SDK；再往上的 4.x 还压着一组 Hadron 补丁，不是架构问题。
+结论：链路是通的，当前发布版还不能当开箱功能发。Zink 链从 2.1 起步，最靠前的两个门槛是 `geometryShader` 与 transform feedback 没进 SDK；再往上的 4.x 还压着一组 Hadron 补丁，不是架构问题。
 
 本文正文和自写的分析稿按 CC BY 4.0 放出，可以转载、拆分、改写，标个出处即可。第三方材料只做事实性引用和链接，版权归各自作者；随包附了什么、没附什么、为什么，见 `CREDITS_AND_LICENSE_zh.md`。英文版是 `Zink_KosmicKrisp_on_macOS_en.md`，对应的许可说明是 `CREDITS_AND_LICENSE_en.md`。
 
@@ -16,11 +16,11 @@
 
 ## 起因
 
-苹果的 OpenGL 从 2013 年起停在 4.1，2018 年标了 deprecated。GL 4.2 往后那些东西——compute、SSBO、indirect draw、transform feedback、geometry stage——原生栈上都没有。同一块芯片 Asahi Linux 已经能报 GL 4.6，问题在驱动。
+苹果的 OpenGL 从 2013 年起停在 4.1，2018 年标了 deprecated。原生栈有 3.2/4.0 那批东西（geometry、transform feedback、tessellation、indirect draw），但 GL 4.2 起的 image load/store、atomic counters，以及 4.3 的 compute、SSBO 都没有。同一块芯片 Asahi Linux 已经能报 GL 4.6，问题在驱动。
 
-受影响的远不止游戏。Blender 开发者门户有一页 KosmicKrisp，5.1 起能跑，逐条列着 limitation：GS 不支持、shader 有时编译失败、`setup-env.sh` 默认配的还是 MoltenVK 得手动改 `VK_DRIVER_FILES`。页面上注了一句，这是给开发者在同一台机器上切 Metal/Vulkan 用的便利选项，没打算进正式发行。光影包这边，OptiFine 在 macOS 只有 8 个 color texture，Iris 能给 16 个 buffer，到驱动这层还是被拦住。做光影的人说 GS 对体素相关着色器基本是必需的。
+受影响的远不止游戏。Blender 开发者门户有一页 KosmicKrisp，5.1 起能跑，逐条列着 limitation：GS 不支持、shader 有时编译失败、`setup-env.sh` 默认配的还是 MoltenVK 得手动改 `VK_DRIVER_FILES`。页面上注了一句，这是给开发者在同一台机器上切 Metal/Vulkan 用的便利选项，没打算进正式发行。光影包这边，OptiFine 在 macOS 只有 8 个 color attachment，Iris 能用到全部 16 个 buffer；真正卡住 Iris 的是 4.3 的 compute/SSBO 那一批。做光影的人说 GS 对体素相关着色器基本是必需的；原生 GL 4.1 本身有 GS，所以 GS 不是原生栈的缺口。
 
-MC Java 只是手上最方便的样本。26.2 的快照窗口里原生 Vulkan 曾是默认，26.2 正式版又切回 OpenGL；Iris 本体仍是 OpenGL-only，依赖 GL 4.x 的光影和模组没有第二条路。走 GL 路径还覆盖早期没有原生后端的版本。默认值以实机 `options.txt` 和 F3 为准，HMCL 代码里的建模只是旁证。
+MC Java 只是手上最方便的样本。26.2 的快照窗口里原生 Vulkan 曾是默认，26.2 正式版又切回 OpenGL；Iris 本体仍是 OpenGL-only，官方目前把 Apple Silicon 列为不支持（驱动崩溃），依赖 GL 4.x 的光影没有第二条路。走 GL 路径还覆盖早期没有原生后端的版本。默认值以实机 `options.txt` 和 F3 为准，HMCL 代码里的建模只是旁证。
 
 Khronos 在 11 月 25 日弃用 MoltenVK、收掉 Portability Initiative，`VK_KHR_portability_subset` 要从 spec 和 headers 里删掉，MVK 不再有新扩展。KosmicKrisp 是 Mesa 主线驱动，NIR 编到 MSL，Metal 4，Vulkan 1.4 conformant，LunarG 的 CI 在 M1/M2/M4 上跑夜间 CTS。
 
@@ -36,7 +36,7 @@ Khronos 在 11 月 25 日弃用 MoltenVK、收掉 Portability Initiative，`VK_K
 - **2026-10-02/03/04**，Hadron 这个 macOS 上的 Windows 游戏兼容层项目（Wine + FEX + Metal）跑了整套 Khronos CTS，Vulkan must-pass 三百多万项、OpenGL 4.6 Khronos 19,714 项，按 0038–0083 编号维护 Mesa 补丁，有 `findings.md`、`scripts/build-cts.sh` 和一串「故意留给 alpha」的清单。
 - **2026-10-11**，Playport 0087「OpenGL through Zink on the host」记下当时的真实天花板 GL 3.3（KK 没有 `shaderFloat64`）；0093 让 Zink 对 KK 不报 fan 支持，gallium 在 CPU 上把 fans/quads 转成三角形列表，Half-Life 单帧 15.28ms → 1.59ms。
 - **2026-10-29**，!44786 合入 GS；!44928 的 XFB 当时还是 draft（2026-11 已转为待评审，仍未合入）。
-- **11 月初**，ScarletNX 在 #1206 里做了 `--vulkan_driver=kosmickrisp|moltenvk` 运行时切换并附 A/B：某段 cutscene 55fps 对 MVK 约 2fps（KK 有 `VK_EXT_conditional_rendering`，遮挡 draw 不用 CPU 等），另一个场景反过来 48–52 对 27。作者写 "one default driver is not the fastest everywhere"。
+- **11 月初**，ScarletNX 的 PR #1206 提了 `--vulkan_driver=kosmickrisp|moltenvk` 运行时切换，并附 A/B：某段 cutscene KK 55fps、MVK 约 2fps（KK 有 `VK_EXT_conditional_rendering`，遮挡 draw 不用 CPU 等）；另一个场景反过来，MVK 48–52fps、KK 27fps。作者写 "one default driver is not the fastest everywhere"。
 - **2026-11-25**，Khronos 弃用 MVK。
 
 还有几份没标日期但更贴这条链：GitHub Gist《Running Minecraft on macOS with Zink + KosmicKrisp》按「第一个问题…第十个问题」debug 到 70fps；GitLab 上 `pauyedin/kosmickrisp-minecraft-macos` 自称 "reproducible setup kit"；steamac 的 Venus host 侧给 KK 打了 63 个补丁；LunarG 十月《State of Vulkan on Apple》给了 app bundle 布局和 `library_path` 相对路径写法。
@@ -55,7 +55,9 @@ GL 应用 / 光影 / 模组
   → Apple Silicon GPU
 ```
 
-能力是 Zink 按 `VP_ZINK_requirements.json` 查底层驱动的，查询方是 Zink 和 GLSL 负载，不是上层应用那份 Vulkan 扩展白名单。
+能力是 Zink 按底层 Vulkan feature 逐项 gate 出来的；`VP_ZINK_requirements.json` 把这些要求按 GL 版本整理成 profile，给 `zink_check_requirements` 用。查询方是 Zink 和 GLSL 负载，不是上层应用那份 Vulkan 扩展白名单。
+
+这两个坑是 **Zink 链的坑，不是原生 GL 的坑**：原生 GL 4.1 有 GS 和 XFB，但没有 4.2+ 的 image/atomic、4.3 的 compute/SSBO。Zink 要从 2.1 爬到 4.x，先得补 3.0/3.2，再补 4.0 的格式位；这三步都过了，才谈得上越过原生 4.1。
 
 通用做法是把 loader 和 KK 的 ICD 打进应用包，进程里设 `VK_DRIVER_FILES`（或 `VK_ICD_FILENAMES`），GL 侧 `MESA_LOADER_DRIVER_OVERRIDE=zink` 加自带的 `libGL` / `libEGL`。LunarG 十月那篇把目录画好了：`Contents/Frameworks/` 放 dylib，`Contents/Resources/vulkan/icd.d/` 放 json，`library_path` 写 `"../../../Frameworks/libvulkan_kosmickrisp.dylib"`，并说不推荐把 loader 装到 `/usr/local/lib`。pauyedin 那个仓库是现成可跑的 kit。这层不用另设计。
 
@@ -98,15 +100,15 @@ Zink 链里没有这层。GL 侧报不报某个版本，是 Zink 拿驱动的能
 - **4.0 的卡点随构建不同，不要并列当同一件事**：当前 `VP_ZINK_requirements.json` 的 `gl40_baseline` 列的是 R32G32B32 三格式的 `UNIFORM_TEXEL_BUFFER_BIT`，没有 `shaderFloat64`；Hadron 0054 修的正是这个 texel buffer，修完从 3.3 到 4.6。Playport 0087 那套构建记的是 `shaderFloat64`（KK 没这个 feature），所以停在 3.3。两份材料各自成立，引用时带构建。
 - Mesa 26.3 新特性清单里 `VK_EXT_transform_feedback on pvr` 是 PowerVR 驱动，不是 kk。
 
-检查工具不用自己写。`meson -Dtools=zink` 产出 `zink_check_requirements`（Mesa !36061）：它把编译进去的 22 个 `VP_ZINK_*` profile 逐个对当前设备跑 `vpGetPhysicalDeviceProfileSupport`，每个打印 `Supported` / `UNSUPPORTED`，最高的 Supported 就是这套构建的 GL 天花板。它不打印版本号，也不打印缺项表；缺项要拿 `VP_ZINK_requirements.json` 对 `vulkaninfo` 自己比（`tools/kkcap.py` 可先把 20 个关键门槛过一遍）。`vkprofiles` 没有 `--compare` 子命令，它只做 profile 文件的 validate / transform / combine。
+检查工具不用自己写。`meson -Dtools=zink` 产出 `zink_check_requirements`（Mesa !36061）：它把编译进去的 22 个 `VP_ZINK_*` profile 逐个对当前设备跑 `vpGetPhysicalDeviceProfileSupport`，每个打印 `Supported` / `UNSUPPORTED`。它给的是**保守上限**，不是驱动实际报的 GL 版本，而且每个 GL profile 都包含 2.1 那一组：stock KK 的 `VK_EXT_custom_border_color` 藏在 `MESA_KK_EXPERIMENTAL=custom_border` 后面，不设这个变量，所有 GL profile 会一起 UNSUPPORTED。跑 checker 时设上它，并在结果里注明；只用于 checker，不要给实际应用开。设了也不保证 `gl21` 一定 Supported——2.1 profile 还要求 `VK_KHR_incremental_present` 等 WSI 项，实际版本仍以应用报的为准。它不打印版本号，也不打印缺项表；缺项要拿 `VP_ZINK_requirements.json` 对 `vulkaninfo` 自己比（`tools/kkcap.py` 可先把 20 个关键门槛过一遍）。`vkprofiles` 没有 `--compare` 子命令，它做的是 profile 文件的 validate / transform / combine 等。
 
 ---
 
 ## 版本口径
 
-MR !44786（`kk: Add geometry shader support`，Junmin Lee）2026-10-29 22:39 GMT+8 由 Marge Bot 合进 main。合入的是 6 个 commit，head 为 `14f59d06`（`kk: Advertise geometryShader`），没有单独的 merge commit；MR 页面对应 15 条流水线（最后一条通过）和 40 条评论。实现接 poly 现成的 lowering（Honeykrisp 同源），顺带修了 adjacency 索引重写、tess→GS 的 primitive ID、image store 后的 fence 剥离、GS side effects 移到 compute pass、exact-thread 间接 dispatch。squidbus 在 M4 Max 跑 full CTS 零失败，Mary Guillemard 在 HK 上验证修好 `primitive_id.matching`，Aitor Camacho reviewed-by 并指派合并。讨论里 Willie Abrams 说 "I have transform feedback working on top of this MR"，开了 !44928；当时是 draft，现在已转为待评审（ready），仍未合入，head `e56f2e43`。
+MR !44786（`kk: Add geometry shader support`，Junmin Lee）2026-10-29 22:39 GMT+8 由 Marge Bot 合进 main。合入的是 6 个 commit，head 为 `14f59d06`（`kk: Advertise geometryShader`），没有单独的 merge commit；MR 页面对应 15 条流水线（最后一条通过）和 40 条评论。实现接 poly 现成的 lowering（Honeykrisp 同源），顺带修了 adjacency 索引重写、tess→GS 的 primitive ID、image store 后的 fence 剥离、GS 的 stores/atomics 只保留一份（从 compute 副本里删掉）、exact-thread 间接 dispatch。squidbus 在 M4 Max 跑 full CTS 零失败，Mary Guillemard 在 HK 上验证修好 `primitive_id.matching`，Aitor Camacho reviewed-by 并指派合并。讨论里 Willie Abrams 说 "I have transform feedback working on top of this MR"，开了 !44928；当时是 draft，现在已转为待评审（ready），仍未合入，head `e56f2e43`。
 
-10 月 29 合入、26.3.1 是 11 月 18 发的，看着像赶上了，其实没有。Mesa 的 feature release 在第一个 RC 那天就把分支从 main 切出来，之后 26.3.x 只收 cherry-pick 的 bugfix：10-14 rc1(branchpoint) → 10-21 rc2 → 10-28 rc3 → 11-04 rc4/final → 11-18 26.3.1。GS 比切分支晚两周。26.3.1 release notes 写 `New features: None`；MR 页面全文搜 `26.3` / `backport` / `cherry` 零命中。SDK 侧最新 1.4.363.1（11-03 补丁版），1.4.363.0 是 9-29；SDK 里的 KK 从 `vulkan-sdk-1.4.363.0` 分支编出，VERSION 是 `26.3.0-devel`，同样不含 GS。11 月没有带 GS 的新 SDK。Khronos 说的下一版在 12 月中，主要做 portability 扩展移除，带不带 `14f59d06` 等 release notes 或实跑 `vulkaninfo`。
+10 月 29 合入、26.3.1 是 11 月 18 发的，看着像赶上了，其实没有。Mesa 的 feature release 在第一个 RC 那天就把分支从 main 切出来，之后 26.3.x 只收 cherry-pick 的 bugfix：10-14 rc1(branchpoint) → 10-21 rc2 → 10-28 rc3 → 11-04 rc4/final → 11-18 26.3.1。GS 比切分支晚两周。26.3.1 release notes 写 `New features: None`；MR 页面全文搜 `26.3` / `backport` / `cherry` 零命中。SDK 侧最新 1.4.363.1（11 月初补丁版），1.4.363.0 是 9 月底；SDK 里的 KK 从 `vulkan-sdk-1.4.363.0` 分支编出，VERSION 是 `26.3.0-devel`，同样不含 GS。11 月没有带 GS 的新 SDK。Khronos 说的下一版在 12 月中，主要做 portability 扩展移除，带不带 `14f59d06` 等 release notes 或实跑 `vulkaninfo`。
 
 社区那张 F3 截图是 `Vulkan 1.4.363 KosmicKrisp` / `Mesa 26.3.1`。前一个是驱动报的 Vulkan API 版本（跟构建时用的 Vulkan-Headers 走），后一个是 Mesa 构建版本；两个都不是 SDK 包版本，也互不代表对方的能力。26.3 分支 10-14 就切了、GS 10-29 才合，所以那台机器没有 GS；这页也不显示 GL 版本。
 
@@ -120,11 +122,12 @@ MR !44786（`kk: Add geometry shader support`，Junmin Lee）2026-10-29 22:39 GM
 
 构建分三套（B 再分出叠了 !44928 的 B+），写能力结论时带上是哪套：
 
-- **A**：SDK 1.4.363.1 里的 KK（Mesa 26.3.0-devel），或 Homebrew Mesa 26.3.1。对外承诺基线，`geometryShader` 和 XFB 都没有，GL 2.1。
-- **B**：Mesa main 自编译（含 `14f59d06`）。GS 有，XFB 没有，注明 commit；GL 仍是 2.1。
+- **A**：SDK 1.4.363.1 里的 KK（Mesa 26.3.0-devel），或 Homebrew Mesa 26.3.1。对外承诺基线，`geometryShader` 和 XFB 都没有，GL 2.1（按 !44928 作者口径推算）。
+- **B**：Mesa main 自编译（含 `14f59d06`）。GS 有，XFB 没有，注明 commit；GL 仍是 2.1（同上）。
+- **B+**：B 再叠 !44928。GS 和 XFB 都有，作者口径 3.3。仍低于 macOS 原生 GL 4.1。
 - **C**：Mesa main 加 Hadron 0038–0083 系列补丁。GS 和 XFB 都有，报 GL 4.6。这套有 `findings.md`、CTS 脚本、owner 决策记录和「故意留给 alpha」清单，是正式工程记录，只是没进 SDK 发布线。
 
-C 的结果不能拿去说 A 支持什么。这条写进文档、能力声明和回传模板三处。
+C 的结果不能拿去说 A 支持什么。另一个容易看岔的：B+ 的 3.3 仍低于原生 GL 4.1，这条链要真正超过原生栈，得走到 C。这两条都写进文档、能力声明和回传模板。
 
 已知瑕疵：Aitor 在 M5 Pro / macOS 27 上见 `dEQP-VK.spirv_assembly.instruction.graphics.float16.logical_nan.opfordequal_vector_geom` 失败，判断是 M3-4 上没有的 Metal 编译器 bug，当时 M1 还没跑。另有一组 CTS 超时用例拟另提 spec/CTS issue，合并前内部 CI 先 skip。GS 是拆成 compute 计数 + 光栅化 VS 展开两遍，帧时间形态和原生 GS 不一样。
 
@@ -138,7 +141,7 @@ C 的结果不能拿去说 A 支持什么。这条写进文档、能力声明和
 
 **Hadron 的 `findings.md` / conformance 记录** 是另一头：把 0038 到 0083 四十多枚补丁按编号配上改了什么、修了哪些测试。M2 Pro / macOS 27 上，Vulkan must-pass 3,247,552 项，OpenGL 4.6 Khronos 从 19,714 tests / 15,296 pass / 6 fail 修到 15,304 pass / 1 fail，GL 4.2 compat、ES 3.1 / 3 / 2 全 0 fail。「Where it stands and what is left on purpose」那节留了 sparse 3D（Metal mip tail bug）、fragment input 124 vs GL 4.6 要求的 128、六进程共享 GPU 的 lost device，每条写了为什么留给 alpha。开头一句该抄进判据："A pass here does not mean a game works." 0080–0083 修的已经不是图形问题了——`vkWaitForFences` 在 device lost 时永久挂住、macOS 没有 `pthread_barrier` 自己实现的有竞态、Zink 提交线程和读 buffer 之间的两个 race。
 
-**Playport 0087 / 0093**：0087 记真实天花板 GL 3.3（KK 无 `shaderFloat64`）；0093 让 Zink 不报 fan 支持，gallium 在 CPU 上转三角形列表，Half-Life 15.28ms → 1.59ms、功耗 4.66W → 2.85W。翻译层上的降级实现不一定更慢，这条留着给样本分列用。
+**Playport 0087 / 0093**：0087 记真实天花板 GL 3.3（KK 无 `shaderFloat64`）；0093 让 Zink 不报 fan 支持，gallium 在 CPU 上转三角形列表，Half-Life 15.28ms → 1.59ms、功耗 4.66W → 2.85W。那是 iOS 侧带 Mesa 补丁的树，和上游 A/B 的 2.1 不是同一套构建，别直接对比。翻译层上的降级实现不一定更慢，这条留着给样本分列用。
 
 **pauyedin 的 setup kit** 把几个坑做成了可复现的东西：`kk-launch.sh` 作为 Prism 的 WrapperCommand 跑在 java 父进程里（作者注明 Prism 自己的 Env 字段传不到），用 `VK_ICD_FILENAMES` 只让游戏走 KK、MoltenVK 留作系统默认；0001 修 `kk_queue_submit()` present 后没 release drawable 导致暂停久了黑屏，0002 用 MAILBOX 替 IMMEDIATE 消闪烁，0003 建磁盘缓存并把 key 改成 driver build SHA + GPU name，0021 再按 MSL 源码 + 管线状态的 blake3 做内存 PSO 缓存。同一个缓存的坑，这里修好，Gist 那边关掉。
 
@@ -156,7 +159,7 @@ C 的结果不能拿去说 A 支持什么。这条写进文档、能力声明和
 
 **然后出两份构建。** A 用现成 SDK。B 从 Mesa main 编两样东西：KK（`-Dvulkan-drivers=kosmickrisp -Dgallium-drivers= -Dopengl=false`）和 Zink 侧检查工具（`-Dgallium-drivers=zink -Dtools=zink`），两个独立 build 目录，锁同一个 commit 并带哈希标识。走 KK 不需要 `-Dmoltenvk-dir`。C 单独放一个目录、单独标记。同一台机要能无残留地在 A/B 间切换，切换后 F3 驱动名和 `vulkaninfo` 对得上。有个前提没落实：Hadron 那些补丁有多少已经进了 main，决定 B 是「编 main」还是「编 main 再叠补丁」，见 open questions。
 
-**差集是第一份硬交付。** `vulkaninfo --json` 存两份，先跑 `zink_check_requirements` 拿到最高 Supported 的档位，再拿 `VP_ZINK_requirements.json` 对该档逐项比对（`tools/kkcap.py` 可先出 20 个关键门槛的 ✓/✗），输出逐项表：哪一档、缺哪个、是硬门槛还是未校验项。顺手把 `kk.json` 按芯片 / macOS / 构建版本归档，现在公开能找到的 dump 基本还是 Mesa 26.0.0-devel 那一版。
+**差集是第一份硬交付。** `vulkaninfo --json` 存两份，先跑 `zink_check_requirements` 拿到保守上限的档位，再拿 `VP_ZINK_requirements.json` 对该档逐项比对（`tools/kkcap.py` 可先出 20 个关键门槛的 ✓/✗），输出逐项表：哪一档、缺哪个、是硬门槛还是未校验项。顺手把 `kk.json` 按芯片 / macOS / 构建版本归档，现在公开能找到的 dump 基本还是 Mesa 26.0.0-devel 那一版。
 
 **样本提前定。** 向光影作者要一句定案：pack 里的 GS 是硬依赖（真 `OpEntryPoint Geometry` / GLSL geometry stage / 硬查 feature 位）还是软依赖（只在高级特效里用、有 compute/mesh 替代分支）；XFB 有没有用来写回。样本至少两个 SSPT/体素类光影、一个 Voxy/DH 类模组、一个真 GS stage 的负载、一个只用固定拓扑 fans/quads 的（单列，0093 已证明这类能 CPU 降级，混进去会污染结论），再加一个非游戏 GL 应用（Blender 类）。本地把每个样本的 `#version`、`OpEntryPoint Geometry`、`#extension` 和 feature 引用点提出来，和差集做第二份对照。
 
@@ -175,7 +178,7 @@ C 的结果不能拿去说 A 支持什么。这条写进文档、能力声明和
 3. `MESA_KK_EXPERIMENTAL` 是进程级读一次、会污染同进程所有 Vulkan 应用，别替用户开。Hadron 0064 里 custom_border 已改成由 Zink 实例识别，不用开 flag。
 4. correctness 那批 hack：灰屏（alpha=0）、黑闪帧（换 blit，2–3%）、局部渲染异常、Voxy VERTEX 编译失败。逐样本记。
 5. MC 反编译命中过 `OptionsForceDefaultGraphicsApiFix`，可能会重置 `preferredGraphicsBackend`。回退路径别只压在一个配置文件上。
-6. 双层转译没有同机苹果 GL 基线 A/B。70fps 是别人机器上的数。11 月那个驱动切换 issue 的 A/B 更该记住：某段 cutscene KK 55fps 对 MVK 约 2fps，另一个场景反过来 48–52 对 27。性能轨按场景分。
+6. 双层转译没有同机苹果 GL 基线 A/B。70fps 是别人机器上的数。11 月那个驱动切换 PR 的 A/B 更该记住：某段 cutscene KK 55fps 对 MVK 约 2fps，另一个场景 MVK 48–52fps 对 KK 27fps。性能轨按场景分。
 7. 上游节奏不押日期。下个 SDK 带不带 `14f59d06`、XFB 什么时候合，都是外部变量。
 8. SDL surface 扩展差集、扩展白名单阻断，前面担心过，后来被反编译、真机和已有实现排掉了。
 
@@ -238,7 +241,7 @@ find build-kk -name '*.json' | grep -i -E 'icd|kosmic'
 
 vulkaninfo --json > kk_B.json
 ./build-zink/src/gallium/drivers/zink/check_requirements/zink_check_requirements
-# 逐档打印 Supported / UNSUPPORTED；最高 Supported 的那档就是 GL 天花板
+# 逐档打印 Supported / UNSUPPORTED；最高 Supported 只是保守上限，2.1 档软要求可能让它偏低
 
 # ICD json 内 library_path 用相对路径
 export VK_DRIVER_FILES=/path/inside/app/kk_icd.json
@@ -420,7 +423,7 @@ Mary Guillemard: Working fine on HK and fixing
 - Playport 0087「OpenGL through Zink on the host」 https://github.com/playportdev/playport/blob/main/docs/decisions/0087-opengl-through-zink-on-the-host.md 、0093 https://github.com/playportdev/playport/blob/main/docs/decisions/0093-opengl-border-colours-and-fans-on-kosmickrisp.md
 - GitLab `pauyedin/kosmickrisp-minecraft-macos` https://gitlab.com/pauyedin/kosmickrisp-minecraft-macos/-/tree/main
 - steamac 图形管线解析（Venus host 侧 KK 63 补丁）
-- ScarletNX #1206「Let a macOS run pick KosmicKrisp or MoltenVK」 https://github.com/scarletnx/ScarletNX/issues/1206
+- ScarletNX PR #1206「Let a macOS run pick KosmicKrisp or MoltenVK」 https://github.com/scarletnx/ScarletNX/issues/1206
 
 **本地产出**
 - `renderpearl` 静态分析的结论（已并入正文与 E.2）；字节码产物不随包，生成方法见 `evidence/how_to_reproduce_disassembly_zh.md`

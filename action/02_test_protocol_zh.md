@@ -3,7 +3,7 @@
 目标只有一个：**在 Mesa main + !44928 上，Zink 到底能报到 GL 几？卡在哪一项？**
 
 完整档约 1–2 小时（首次编 KK 偏上限），不需要图形开发经验，会复制命令就行。
-核心步骤**不需要启动任何游戏或应用**——`zink_check_requirements` 直接问当前 Vulkan 设备，逐档打 `Supported` / `UNSUPPORTED`，最高档就是 GL 天花板。跑应用是可选项。
+核心步骤**不需要启动任何游戏或应用**——`zink_check_requirements` 直接问当前 Vulkan 设备，逐档打 `Supported` / `UNSUPPORTED`。它给的是**保守上限**：3.0 以上按硬门槛，2.1 档的软要求（stock KK 的 `VK_EXT_custom_border_color` 藏在 `MESA_KK_EXPERIMENTAL=custom_border` 后面）可能让 `gl21` 报 UNSUPPORTED，但 Zink 实际仍可能报 2.1。要确认实际 GL 版本，最后跑一次 GL 应用或 `glxinfo`。
 
 ---
 
@@ -12,7 +12,7 @@
 - Apple Silicon（M1–M6），macOS 26 或 27
 - Xcode + Command Line Tools
 - 磁盘 ≥ 15 GB；首次编 KK + Zink 约 1–2 小时（M1 冷构建偏上限，M4/M5 快一些）
-- 已装 LunarG Vulkan SDK（要里面的 `vulkaninfo`，以及静态 `spirv-tools`）
+- 已装 LunarG Vulkan SDK（要里面的 `vulkaninfo`，以及静态 `spirv-tools`；装的时候勾上 KosmicKrisp 组件，确认 `$VULKAN_SDK/share/vulkan/icd.d/libkosmickrisp_icd.json` 存在）
 - 网络能访问 `gitlab.freedesktop.org`
 
 > 不建议在你的日常系统上长期启用。这是一次性验证，跑完把环境变量删掉就回到原状。
@@ -21,7 +21,7 @@
 
 ## 0.5 先测构建 A（检查 10 分钟；从零编工具 20–40 分钟）
 
-在动 KK 之前，先用**现成的 SDK 版本**跑一次检查工具，确认 A 的天花板。预期是 2.1，不是 3.1：
+在动 KK 之前，先用**现成的 SDK 版本**跑一次检查工具，确认 A 的 3.0 硬门槛没过。预期 `gl30` UNSUPPORTED；`gl21` 可能 Supported，也可能因 2.1 profile 的 WSI/软要求报 UNSUPPORTED：
 
 - Zink 的 3.0 档要求 `VK_EXT_transform_feedback` 和 `VK_EXT_conditional_rendering`，没有「用到才炸」的余地；
 - !44928 的描述也写明，加上它才 “from OpenGL 2.1 to 3.3 (ES 3.1)”。
@@ -31,11 +31,17 @@
 ```bash
 meson setup build-tools . --buildtype=release -Dplatforms=macos -Dtools=zink
 ninja -C build-tools
-# 用 SDK 的 KK 当当前驱动，直接跑；没有参数
+
+# 必须显式指向 KK 的 ICD，否则 loader 可能先枚举到 MoltenVK
+export VULKAN_SDK=<SDK 的 macOS 目录>   # 若还没 source setup-env.sh
+export VK_DRIVER_FILES="$VULKAN_SDK/share/vulkan/icd.d/libkosmickrisp_icd.json"
+# 只给 checker 用：stock KK 默认不暴露 custom border，会让所有 GL profile 一起 UNSUPPORTED
+export MESA_KK_EXPERIMENTAL=custom_border
+
 ./build-tools/src/gallium/drivers/zink/check_requirements/zink_check_requirements
 ```
 
-它会把 `VP_ZINK_*` profile 逐个打 `Supported` / `UNSUPPORTED`：预期 `gl21` Supported、`gl30` UNSUPPORTED。它不打印版本号，也不打印缺项；最高 Supported 的那档就是天花板。
+它会把 `VP_ZINK_*` profile 逐个打 `Supported` / `UNSUPPORTED`。设了上面两个变量后，`gl21` 可能 Supported；`gl30` 仍应 UNSUPPORTED（XFB 缺）。`gl21` 就算 UNSUPPORTED，也只说明 2.1 strict profile 没过（还要求 `VK_KHR_incremental_present` 等 WSI 项），不等于 Zink 报不到 2.1。它不打印版本号，也不打印缺项。
 
 如果 `gl30` 也 Supported，说明 SDK 里的 KK 已经有 XFB，能力表要改。这一步不需要编 KK，**先做它，再决定要不要花 1–2 小时编 B+。**
 
@@ -100,7 +106,7 @@ find build-kk -name '*.json' | grep -i -E 'icd|kosmic'
 
 export VK_DRIVER_FILES=<上面那个 json 的绝对路径>
 export MESA_SHADER_CACHE_DIR=~/kk-cache-$(date +%s)   # 别复用旧缓存
-unset MESA_KK_EXPERIMENTAL                            # 千万别设 all
+unset MESA_KK_EXPERIMENTAL                            # 抓 vulkaninfo 用 stock 行为；第 5 步只给 checker 设 custom_border
 
 vulkaninfo --json > ~/kk-xfb.json
 
@@ -112,18 +118,21 @@ vulkaninfo | grep -E 'driverName|driverInfo|apiVersion'
 
 ---
 
-## 5. 读 GL 天花板（核心证据）
+## 5. 读逐档结果（核心证据）
 
 ```bash
 meson setup build-zink . --buildtype=release -Dplatforms=macos -Dtools=zink
 ninja -C build-zink
+
+# 只给 checker 用：让 2.1 profile 的 custom border 软要求过关；不要给应用开
+export MESA_KK_EXPERIMENTAL=custom_border
 
 # 不带参数：枚举编译进去的 profile，逐个对当前设备检查
 ./build-zink/src/gallium/drivers/zink/check_requirements/zink_check_requirements \
   | tee ~/kk-zink-requirements.txt
 ```
 
-输出形如 `Checking profile VP_ZINK_gl33_baseline` 加 `Supported` / `UNSUPPORTED physical device`。**最高的 Supported 档就是 GL 天花板**：`gl21` = 2.1，`gl30` = 3.0，`gl33` = 3.3，`gl46` = 4.6。
+输出形如 `Checking profile VP_ZINK_gl33_baseline` 加 `Supported` / `UNSUPPORTED physical device`。**最高的 Supported 档是保守上限**：`gl21` = 2.1，`gl30` = 3.0，`gl33` = 3.3，`gl46` = 4.6。2.1 档的软要求可能让 `gl21` 偏低，实际版本以应用报的为准。
 
 它不打印版本号，也不打印缺项表。要缺项就把 `~/kk-xfb.json` 和 `VP_ZINK_requirements.json` 对照，或先跑：
 
@@ -131,7 +140,7 @@ ninja -C build-zink
 python tools/kkcap.py one ~/kk-xfb.json --md
 ```
 
-**要记下来的两件事**：最高 Supported 的 profile；`VK_EXT_transform_feedback` 和 `geometryShader` 在不在 `vulkaninfo` 里。
+**要记下来的两件事**：最高 Supported 的 profile（保守上限）；`VK_EXT_transform_feedback` 和 `geometryShader` 在不在 `vulkaninfo` 里。
 
 ---
 
@@ -142,7 +151,7 @@ Chip / macOS:        M1 Pro / 26.2
 Build:               mesa main @ <base commit>, MR !44928 head <sha>
 driverName / API:    KosmicKrisp / 1.4.xxx
 vulkaninfo XFB:      present | absent
-Zink GL ceiling:    3.3 | 2.1 | ...（最高 Supported profile）
+Zink profile ceiling: 3.3 | 2.1 | ...（checker 保守值；实际 GL 版本另填）
 Missing (hard):      <逐项>
 Missing (unchecked): <逐项>
 Crashes / validation errors: none | <简述>

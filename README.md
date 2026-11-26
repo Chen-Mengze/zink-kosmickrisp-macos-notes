@@ -9,7 +9,7 @@
 
 Apple Silicon 的 macOS 上，用 `Zink（Mesa Gallium，GL → Vulkan）→ KosmicKrisp（Vulkan → Metal 4）→ Apple Silicon GPU` 这条链把桌面 OpenGL 顶起来：链路怎么走、别人已经做到哪一步、真要动手还差什么。中文正文与英文版并列，附证据材料与引用说明。
 
-> **结论**：链路是通的，当前发布版还不能当开箱功能发。最靠前的两个门槛是 `geometryShader` 与 transform feedback 没进 SDK；再往上的 4.x 还压着一组 Hadron 补丁。
+> **结论**：链路是通的，当前发布版还不能当开箱功能发。Zink 链从 2.1 起步，最靠前的两个门槛是 `geometryShader` 与 transform feedback 没进 SDK；再往上的 4.x 还压着一组 Hadron 补丁。
 
 ## 先交代底细
 
@@ -47,7 +47,7 @@ GL 应用 / 光影 / 模组
   → Apple Silicon GPU
 ```
 
-能力是 Zink 按 `VP_ZINK_requirements.json` 逐档查底层驱动的，查询方是 Zink 和 GLSL 负载，不是上层应用那份 Vulkan 扩展白名单。所以「上游应用用不到这些扩展、加了也没用」在原生 Vulkan 后端里成立，在这条链上不成立——底层多一个 feature 位，GL 侧就多一档语义，就多一个能编译出画面的 shader。
+能力是 Zink 按底层 Vulkan feature 逐项 gate 出来的；`VP_ZINK_requirements.json` 把这些要求按 GL 版本整理成 profile，给 `zink_check_requirements` 用。查询方是 Zink 和 GLSL 负载，不是上层应用那份 Vulkan 扩展白名单。所以「上游应用用不到这些扩展、加了也没用」在原生 Vulkan 后端里成立，在这条链上不成立——底层多一个 feature 位，GL 侧就多一档语义，就多一个能编译出画面的 shader。
 
 ## 版本口径：三套构建（B 再分 B+）不能混着说
 
@@ -58,7 +58,7 @@ GL 应用 / 光影 / 模组
 | **B+** | B 再叠 !44928（head `e56f2e43`） | ✓ | ✓ | 3.3（!44928 作者口径，待实机复核） |
 | **C** | main + Hadron 0038–0083 补丁 | ✓ | ✓ | 4.6（Hadron 记录） |
 
-C 的结果不能拿去说 A 支持什么。这一条同时写在正文、能力声明和回传模板里。
+C 的结果不能拿去说 A 支持什么。另一个容易看岔的：B+ 的 3.3 仍低于 macOS 原生 GL 4.1，只有 C 的 4.6 越过原生栈。这两条同时写进正文、能力声明和回传模板。
 
 补一句容易看岔的：Mesa 的 feature release 在第一个 RC 那天就从 main 切了分支，GS 是 10-29 合的、26.3.1 是 11-18 发的，看着像赶上了，其实没进。所以「装了最新 KK 就有 GS」目前不成立。退一步说，就算装到带 GS 的构建，GL 也还是 2.1——3.0 先要求 XFB，3.2 才轮到 GS。
 
@@ -93,7 +93,7 @@ https://github.com/Chen-Mengze/zink-kosmickrisp-macos-notes
 
 On Apple Silicon, desktop OpenGL can be served by the chain `Zink (Mesa Gallium, GL → Vulkan) → KosmicKrisp (Vulkan → Metal 4) → Apple Silicon GPU`. This repository records how that chain is wired, how far others have already got, and what is still missing before anyone can ship it.
 
-> **TL;DR** — the chain works; the current release cannot be shipped as an out-of-the-box feature. The first two gates are `geometryShader` and transform feedback, neither in the SDK; 4.x above that also waits on a set of Hadron patches.
+> **TL;DR** — the chain works; the current release cannot be shipped as an out-of-the-box feature. The Zink chain starts at 2.1; the first two gates are `geometryShader` and transform feedback, neither in the SDK; 4.x above that also waits on a set of Hadron patches.
 
 The author has no Mac and has never written a Mesa driver. Everything here is assembled from other people's merge requests, findings documents, gists and disassembly, plus a screenshot provided by someone else. Anything not run first-hand is attributed; versions, CTS numbers and patch IDs defer to the primary material. Corrections are welcome.
 
@@ -124,7 +124,7 @@ The author has no Mac and has never written a Mesa driver. Everything here is as
 | **B+** | B plus !44928 (head `e56f2e43`) | yes | yes | 3.3 (per the !44928 author; to be confirmed on hardware) |
 | **C** | main + Hadron patches 0038–0083 | yes | yes | 4.6 (per Hadron records) |
 
-Results from C cannot be used to claim anything about A. Even a build with GS but without XFB stays at 2.1: 3.0 already requires transform feedback.
+Results from C cannot be used to claim anything about A. The other easy misread: B+'s 3.3 is still below native macOS GL 4.1; only C's 4.6 gets past the native stack. Even a build with GS but without XFB stays at 2.1: 3.0 already requires transform feedback.
 
 ### Contribute
 
