@@ -1,12 +1,12 @@
-name: 光影包 GS 依赖
-description: 说明某个光影包对 geometryShader 是硬依赖还是软依赖
+name: "光影包 GS 依赖 / Shaderpack GS dependency"
+description: "说明某个光影包对 geometryShader 是硬依赖还是软依赖 / State whether a shaderpack hard-depends on geometryShader"
 title: "[pack] <pack 名> / <硬依赖|软依赖|不确定>"
 labels: ["shaderpack"]
 body:
   - type: markdown
     attributes:
       value: |
-        先跑一次 `python 工具/packscan.py <pack 路径>`，把输出贴进来。它给的是初判，最终以作者说明为准。
+        先跑一次 `python tools/packscan.py <pack 路径>`，把输出贴进来。它给的是初判，最终以作者说明为准。
 
   - type: input
     id: pack

@@ -14,15 +14,15 @@
 | B | main + `14f59d06` | ✓ | ✗ | 无公开数据 | 空白 |
 | C | main + Hadron 0038–0083 | ✓ | ✓ | 4.6 | Hadron findings + CTS 15,304 pass / 1 fail |
 
-A 的矛盾写清楚：Zink 文档把 `VK_EXT_transform_feedback` 列为 GL 3.0 的 **required and fully supported**，但 A 没有 XFB 却报 3.1。要么这一档的检查没执行，要么能力表填错了。见 `行动/06_笔记修订清单.md` 第 1 条。
+A 的矛盾写清楚：Zink 文档把 `VK_EXT_transform_feedback` 列为 GL 3.0 的 **required and fully supported**，但 A 没有 XFB 却报 3.1。要么这一档的检查没执行，要么能力表填错了。见 `action/06_note_revisions_zh.md` 第 1 条。
 
 ## 待办（按顺序，每条都有判据）
 
 1. **10 分钟复核构建 A** — 不需要编 KK，只编 `-Dtools=zink`，用现成 SDK 的 KK 跑 `zink_check_requirements`。
-   判据：输出里 XFB 在不在 missing；实际报的版本号。三条分支见 `行动/02_真机测试协议.md` 第 0.5 节。
+   判据：输出里 XFB 在不在 missing；实际报的版本号。三条分支见 `action/02_test_protocol_zh.md` 第 0.5 节。
 2. **40 分钟测构建 B** — 叠 !44928，出 `vulkaninfo --json` + 差集。
    判据：GL 能不能过 3.2；不能的话缺哪一项。
-3. **光影包定性** — 用 `工具/packscan.py` 扫目标 pack，得到 HARD / SOFT / NONE。
+3. **光影包定性** — 用 `tools/packscan.py` 扫目标 pack，得到 HARD / SOFT / NONE。
    判据：至少两个 SSPT/体素类 pack + 一个真 GS 负载，硬依赖占比是多少。
 4. **上游问询** — 把 1、2 的结果贴到 !44928，并问 12 月中 SDK 是否含 `14f59d06`。
    判据：拿到维护者一句明确答复（含或不含）。
@@ -47,7 +47,7 @@ A 的矛盾写清楚：Zink 文档把 `VK_EXT_transform_feedback` 列为 GL 3.0 
 
 1. **i18n 拼写**：`settings.advanced.renderer.kosmickrisp=KosmickKrisp` 多了一个 `k`。一行，改完就是对的。
 2. **Homebrew 自定义前缀**：`HomebrewUtils` 里留着 `// TODO: custom Homebrew prefix for macOS`，现在只认 `/opt/homebrew` 和 `/usr/local`。
-3. **macOS 的 GL/Zink 分支**：`Renderer.OpenGL.ZINK` 在 macOS 可见但空操作。补 `MESA_LOADER_DRIVER_OVERRIDE` 和 `-Dorg.lwjgl.opengl.libname` 两个点即可；前提是有一个可用的 Mesa `libGL.dylib`。细节在 `行动/07_HMCL接入点.md`。
+3. **macOS 的 GL/Zink 分支**：`Renderer.OpenGL.ZINK` 在 macOS 可见但空操作。补 `MESA_LOADER_DRIVER_OVERRIDE` 和 `-Dorg.lwjgl.opengl.libname` 两个点即可；前提是有一个可用的 Mesa `libGL.dylib`。细节在 `action/07_hmcl_integration_zh.md`。
 
 前两个是「一定能合」的，第三个要先解决 `libGL` 来源，别急着提。
 
@@ -65,4 +65,4 @@ A 的矛盾写清楚：Zink 文档把 `VK_EXT_transform_feedback` 列为 GL 3.0 
 - 每条数据必须带：芯片、macOS、构建标识、commit、抓取日期。
 - 不混 A/B/C；`MESA_GL_VERSION_OVERRIDE` 出来的数字不进表。
 - 表格只收「有人跑过」的；推测写进正文，不进表。
-- 新记录放 `数据/`，格式见 `数据/README.md`。
+- 新记录放 `data/`，格式见 `data/README.md`。

@@ -1,37 +1,37 @@
-# Mesa !44786 公开引用摘录
+# Mesa !44786 — Public Quote Sheet
 
-出处：https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/44786
+Source: https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/44786
 
-这里只留核对结论所必需的最短引用。页面文字版权归各自发言者（MR 描述归 Junmin Lee，评论归各发言人），不随代码许可走；完整上下文、时间线和未引用的讨论请点上面的链接。站点界面文案、头像、图标等一概未收录。个人邮箱已去掉。
+Only the shortest quotes needed to verify the conclusions. Page text belongs to its respective speakers (the MR description to Junmin Lee, comments to their authors) and does not follow the code licence; full context, timeline and unquoted discussion are at the link above. Site chrome, avatars and icons are not included. Personal email addresses have been removed.
 
 ---
 
-## 页面状态与描述定调句
+## Page status and the framing sentence
 
 ```text
-已合并
+Merged
 kk: Add geometry shader support
-Junmin Lee 请求合并 junminlee2004/mesa:kk-geometry 到 main
-40 提交 / 6 流水线 / 15 报告
+Junmin Lee requested to merge junminlee2004/mesa:kk-geometry into main
+40 commits / 6 pipelines / 15 reports
 ```
 
 > "This MR adds geometry shader support to the KosmicKrisp Vulkan driver
 > (mesa/mesa#14251) by wiring up poly's existing emulation used by
 > Honeykrisp for KosmicKrisp."  — Junmin Lee, MR description
 
-描述里另列了四条附加改动：exact-thread 间接 compute dispatch、无 GS 管线的 adjacency 索引重写、tess→GS 的 primitive ID、GS side effects 只执行一次并剥掉 image store 后的 fence。这四条在笔记正文按事实转述，不整段复制；需要原文请点链接。
+The description lists four additional changes: exact-thread indirect compute dispatch, adjacency index rewriting for pipelines without a GS, tess→GS primitive ID, and GS side effects running once with the fence after image stores stripped. The main note paraphrases these as facts instead of copying the block; see the link for the original text.
 
-## 合并记录
+## Merge record
 
 ```text
-合并者: Marge Bot (2026年10月29日 GMT+8 22:39:18)
-已合并到 main 的 14f59d06 的变更。
+Merged by: Marge Bot (2026-10-29 22:39:18 GMT+8)
+Changes from 14f59d06 merged into main.
 14f59d06 - kk: Advertise geometryShader
 Aitor Camacho assigned to @marge-bot
 Marge Bot merged
 ```
 
-最终一批里的关键提交标题（事实信息）：
+Key commit titles from the final push (factual information):
 
 ```text
 kk: Add exact-thread indirect compute dispatch
@@ -42,7 +42,7 @@ poly: Use the patch index as the geometry shader primitive ID
 kk: Advertise geometryShader
 ```
 
-## 讨论短句
+## Short comments
 
 ```text
 squidbus: As mentioned in the description, I ran full CTS on an M4 Max and
@@ -73,4 +73,4 @@ Mary Guillemard: Working fine on HK and fixing
 
 ---
 
-引用范围与移除渠道见根目录 `版权与引用说明.md`。
+Scope of citation and takedown channel: `../CREDITS_AND_LICENSE_en.md`.

@@ -17,7 +17,7 @@ YYYY-MM-DD_<芯片>_macOS<版本>_<构建>
 | `notes.md` | 否 | 异常、复现步骤、截图说明 |
 | `screenshot.png` | 否 | F3 或驱动信息截图，必须能读到驱动名 |
 
-`kk.json.meta.json` 的字段（`工具/kkcap.py` 直接认这个命名）：
+`kk.json.meta.json` 的字段（`tools/kkcap.py` 直接认这个命名）：
 
 ```json
 {
@@ -63,10 +63,10 @@ YYYY-MM-DD_<芯片>_macOS<版本>_<构建>
 ## 汇总
 
 ```bash
-python 工具/kkcap.py matrix 数据/*/kk.json
+python tools/kkcap.py matrix data/*/kk.json
 ```
 
-输出一张跨机型表，直接贴进 `跟进.md`。
+输出一张跨机型表，直接贴进 `STATUS.md`。
 
 ## 许可
 

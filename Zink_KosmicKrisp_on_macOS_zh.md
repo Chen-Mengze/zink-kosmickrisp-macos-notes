@@ -10,7 +10,7 @@
 
 结论：链路是通的，当前发布版还不能当开箱功能发。卡住的是两个没进 SDK 的能力，不是架构。
 
-本文正文和自写的分析稿按 CC BY 4.0 放出，可以转载、拆分、改写，标个出处即可。第三方材料只做事实性引用和链接，版权归各自作者；随包附了什么、没附什么、为什么，见 `版权与引用说明.md`。英文版是 `Zink_KosmicKrisp_on_macOS_EN.md`，对应的许可说明是 `CREDITS_AND_LICENSE_EN.md`。
+本文正文和自写的分析稿按 CC BY 4.0 放出，可以转载、拆分、改写，标个出处即可。第三方材料只做事实性引用和链接，版权归各自作者；随包附了什么、没附什么、为什么，见 `CREDITS_AND_LICENSE_zh.md`。英文版是 `Zink_KosmicKrisp_on_macOS_en.md`，对应的许可说明是 `CREDITS_AND_LICENSE_en.md`。
 
 ---
 
@@ -110,13 +110,13 @@ MR !44786（`kk: Add geometry shader support`，Junmin Lee）2026-10-29 22:39 GM
 
 社区那张 F3 截图是 `Vulkan 1.4.363 KosmicKrisp` / `Mesa 26.3.1` 。两个号一条是 SDK/API 号、一条是 Mesa 分支号，互不代表对方的能力。那台机器没有 GS。
 
-![M6 上的 F3，右上读到 Vulkan 1.4.363 KosmicKrisp Mesa 26.3.1](证据/截图2_M6_F3_KosmicKrisp.jpg)
+![M6 上的 F3，右上读到 Vulkan 1.4.363 KosmicKrisp Mesa 26.3.1](evidence/screenshot_M6_F3_KosmicKrisp.jpg)
 
 图由 HMCL 维护者 [Glavo](https://github.com/Glavo) 提供。这里显示的 KosmicKrisp 后端由 HMCL 提供开启入口：该选项默认隐藏，只有在系统里通过包管理器装好 KK 之后，HMCL 才会把它显示出来并允许切换启用。所以它不是「装了 macOS 就自动能用」的状态，也不是 MC 自身的默认后端。
 
-图上还能读到 `Minecraft 26.3 (26.3/vanilla)`、`Java: 25.0.5.0.3`、`12x Apple M6`、`Apple M6 (iGPU)`。小字不便检索，逐字转录在 `证据/F3_文字转录.md`。左上 `119 fps T: 120 (fifo)` 不能当「没降级」的证据，OpenGL 也能跑这个数；定案靠的是右上那行驱动名。
+图上还能读到 `Minecraft 26.3 (26.3/vanilla)`、`Java: 25.0.5.0.3`、`12x Apple M6`、`Apple M6 (iGPU)`。小字不便检索，逐字转录在 `evidence/F3_transcript_zh.md`。左上 `119 fps T: 120 (fifo)` 不能当「没降级」的证据，OpenGL 也能跑这个数；定案靠的是右上那行驱动名。
 
-图片的使用范围与撤回方式见 `版权与引用说明.md`。
+图片的使用范围与撤回方式见 `CREDITS_AND_LICENSE_zh.md`。
 
 构建分三套，写能力结论时带上是哪套：
 
@@ -284,17 +284,17 @@ VK_DRIVER_FILES=/path/to/kk_icd.json                     # 再指向 KK
 
 ## 附录 D · 这个包里有什么
 
-公开发布的版本带一张用于说明驱动名的 F3 截图、引用、转录和自写的稿子；不带整页存档、专有字节码产物或整段复制件。原件都在下面第二部分列了去处，需要核对的人自己点过去看。图片用相对路径内联在「版本口径」那节，笔记和 `证据/` 同级时才能显示。
+公开发布的版本带一张用于说明驱动名的 F3 截图、引用、转录和自写的稿子；不带整页存档、专有字节码产物或整段复制件。原件都在下面第二部分列了去处，需要核对的人自己点过去看。图片用相对路径内联在「版本口径」那节，笔记和 `evidence/` 同级时才能显示。
 
 **随包**
 
 | 文件 | 内容 |
 |---|---|
-| `版权与引用说明.md` | 正文许可、第三方归属、图片使用范围、未随包材料的获取方式、移除请求渠道 |
-| `证据/截图2_M6_F3_KosmicKrisp.jpg` | M6 上的 F3 原截图，HMCL 维护者 [Glavo](https://github.com/Glavo) 提供；确认驱动名与硬件信息，已在正文内联。该 KK 后端由 HMCL 提供开启入口，需先经包管理器安装 KK 才显示并允许切换 |
-| `证据/F3_文字转录.md` | 同图关键行的文字转录，便于检索和复制 |
-| `证据/MR44786_公开引用摘录.md` | 公开 MR 页面上必要的最短引用，每条标了作者和出处 |
-| `证据/如何自行复现反汇编.md` | 生成 `renderpearl` 反汇编的方法与命令，不含任何产物 |
+| `CREDITS_AND_LICENSE_zh.md` | 正文许可、第三方归属、图片使用范围、未随包材料的获取方式、移除请求渠道 |
+| `evidence/screenshot_M6_F3_KosmicKrisp.jpg` | M6 上的 F3 原截图，HMCL 维护者 [Glavo](https://github.com/Glavo) 提供；确认驱动名与硬件信息，已在正文内联。该 KK 后端由 HMCL 提供开启入口，需先经包管理器安装 KK 才显示并允许切换 |
+| `evidence/F3_transcript_zh.md` | 同图关键行的文字转录，便于检索和复制 |
+| `evidence/MR44786_public_quotes_zh.md` | 公开 MR 页面上必要的最短引用，每条标了作者和出处 |
+| `evidence/how_to_reproduce_disassembly_zh.md` | 生成 `renderpearl` 反汇编的方法与命令，不含任何产物 |
 
 **未随包（以及为什么不附）**
 
@@ -302,14 +302,14 @@ VK_DRIVER_FILES=/path/to/kk_icd.json                     # 再指向 KK
 |---|---|---|
 | GitLab !44786 整页存档（`.mht`，含页面样式、头像、界面文案） | https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/44786 | 整页再分发会把站点界面与第三方素材一起带出去；必要事实已在 `MR44786_公开引用摘录.md` 里短引 |
 | 该页抽出的 647 行纯文本 | 同上链接，或自行保存页面 | 同上；避免整页文本的复制件 |
-| `renderpearl` 反汇编全文（2457 行）及其切行版 | 按 `证据/如何自行复现反汇编.md` 自行生成 | 属游戏客户端专有字节码的派生内容，不随公开包分发；正文只保留结论与复现方法 |
+| `renderpearl` 反汇编全文（2457 行）及其切行版 | 按 `evidence/how_to_reproduce_disassembly_zh.md` 自行生成 | 属游戏客户端专有字节码的派生内容，不随公开包分发；正文只保留结论与复现方法 |
 | 早期的反编译结论稿 | 不需要了，修正后的结论已收进正文与 E.2 | 原稿含字节码片段、本机路径，且有几条判断后来被证伪，留着只会添乱 |
 
 附录 E 里的引文都出自前两份公开页面，正文对社区先行者成果的转述只取事实与数字，没有复制原文段落。
 
 ## 附录 E · 公开页面短引与结论
 
-下面只放公开页面上必要的最短引用，文字版权归各自发言者，完整上下文见链接（`https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/44786`）。反汇编产物不在这里贴，E.2 只列结论，复现方法见 `证据/如何自行复现反汇编.md`。
+下面只放公开页面上必要的最短引用，文字版权归各自发言者，完整上下文见链接（`https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/44786`）。反汇编产物不在这里贴，E.2 只列结论，复现方法见 `evidence/how_to_reproduce_disassembly_zh.md`。
 
 ### E.1 Mesa !44786
 
@@ -373,7 +373,7 @@ Mary Guillemard: Working fine on HK and fixing
 
 ### E.2 反汇编结论（不贴字节码）
 
-正文「链路，两个会踩的坑」那节那几条来自对游戏客户端 class 的静态分析。产物属专有字节码的派生内容，不随公开包分发；按 `证据/如何自行复现反汇编.md` 可自行生成。这里只列结论，便于对照：
+正文「链路，两个会踩的坑」那节那几条来自对游戏客户端 class 的静态分析。产物属专有字节码的派生内容，不随公开包分发；按 `evidence/how_to_reproduce_disassembly_zh.md` 可自行生成。这里只列结论，便于对照：
 
 - `VulkanBackend.loadLibrary()` 传的是 `SharedLibrary.getPath()`（运行时路径，不是字面量），随后比较两个 `vkGetInstanceProcAddr` 的地址，不等就抛 `BackendCreationException` 并 unload。
 - `VulkanBackend.createDevice()` 先枚举驱动实际暴露的扩展，再对 required / requiredIfAvailable / optional 三组逐个 `isSupported`，通过才加入并打 `Enabling ... FeatureSet` 日志。
@@ -387,7 +387,7 @@ Mary Guillemard: Working fine on HK and fixing
 
 ## 材料出处
 
-一手记录优先，能点开的放链接。本文只做事实性引用和索引，没有复制这些页面的原文段落或整页存档；引用范围、许可和移除渠道见 `版权与引用说明.md`。
+一手记录优先，能点开的放链接。本文只做事实性引用和索引，没有复制这些页面的原文段落或整页存档；引用范围、许可和移除渠道见 `CREDITS_AND_LICENSE_zh.md`。
 
 **驱动与官方**
 - `VP_ZINK_requirements.json` / https://docs.mesa3d.org/drivers/zink.html ；Mesa !36061 https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/36061
@@ -410,5 +410,5 @@ Mary Guillemard: Working fine on HK and fixing
 - GitHub #1206「Let a macOS run pick KosmicKrisp or MoltenVK」
 
 **本地产出**
-- `renderpearl` 静态分析的结论（已并入正文与 E.2）；字节码产物不随包，生成方法见 `证据/如何自行复现反汇编.md`
-- HMCL 维护者 [Glavo](https://github.com/Glavo) 提供的 F3 截图（`Vulkan 1.4.363 KosmicKrisp` / `Mesa 26.3.1`），原图与文字转录均随包；该后端由 HMCL 在包管理器已安装 KK 的前提下提供显示与切换。图片使用范围见 `版权与引用说明.md`
+- `renderpearl` 静态分析的结论（已并入正文与 E.2）；字节码产物不随包，生成方法见 `evidence/how_to_reproduce_disassembly_zh.md`
+- HMCL 维护者 [Glavo](https://github.com/Glavo) 提供的 F3 截图（`Vulkan 1.4.363 KosmicKrisp` / `Mesa 26.3.1`），原图与文字转录均随包；该后端由 HMCL 在包管理器已安装 KK 的前提下提供显示与切换。图片使用范围见 `CREDITS_AND_LICENSE_zh.md`

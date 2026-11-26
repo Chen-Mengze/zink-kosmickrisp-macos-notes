@@ -1,5 +1,5 @@
-name: 口径纠错
-description: 指出正文里转述错误、版本号过时或结论被证伪的地方
+name: "口径纠错 / Correction"
+description: "指出正文里转述错误、版本号过时或结论被证伪的地方 / Report a wrong paraphrase, stale version, or disproved claim"
 title: "[纠错] <章节> / <一句话>"
 labels: ["correction"]
 body:

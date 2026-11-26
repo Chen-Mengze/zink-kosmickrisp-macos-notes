@@ -1,12 +1,12 @@
 # 版权与引用说明
 
-这份说明是给要转发、引用、或者把材料接到自己项目里的人看的。目标只有一个：让这份笔记能公开传，又不把别人的整页存档、专有产物顺手打包带走。唯一保留的第三方图像是一张用于说明驱动名的 F3 截图，使用范围写在下面。English version: `CREDITS_AND_LICENSE_EN.md`。
+这份说明是给要转发、引用、或者把材料接到自己项目里的人看的。目标只有一个：让这份笔记能公开传，又不把别人的整页存档、专有产物顺手打包带走。唯一保留的第三方图像是一张用于说明驱动名的 F3 截图，使用范围写在下面。English version: `CREDITS_AND_LICENSE_en.md`。
 
 ## 本文自己写的东西
 
-- `macOS上跑Zink和KosmicKrisp_工程笔记.md`（正文，含附录 E.2 收编后的分析结论）
-- `证据/MR44786_公开引用摘录.md` 里的编排与注释
-- `证据/F3_文字转录.md`、`证据/如何自行复现反汇编.md`
+- `Zink_KosmicKrisp_on_macOS_zh.md`（正文，含附录 E.2 收编后的分析结论）
+- `evidence/MR44786_public_quotes_zh.md` 里的编排与注释
+- `evidence/F3_transcript_zh.md`、`evidence/how_to_reproduce_disassembly_zh.md`
 
 以上按 **CC BY 4.0** 放出：可以转载、拆分、改写、拿去做文档或 wiki 页面，标一下出处即可。署名按发布处的作者名填写。
 
@@ -26,7 +26,7 @@
 | GitHub Gist《Running Minecraft on macOS with Zink + KosmicKrisp》 | 九个 debug 问题的结论、70fps、2–3% | 原文见该 Gist，正文只作事实转述 |
 | Hadron `findings.md` / conformance 记录、Playport 0087 / 0093 | 0038–0083 的编号与结论、CTS 数字、fans/quads 的收益 | 各项目仓库，正文只作事实转述 |
 | `pauyedin/kosmickrisp-minecraft-macos`、steamac | 缓存 key 口径、0001–0003/0021、63 补丁 | https://gitlab.com/pauyedin/kosmickrisp-minecraft-macos/-/tree/main 等 |
-| HMCL 维护者 [Glavo](https://github.com/Glavo) 提供的 F3 截图 | 确认实际驱动名、机型与画面状态（`证据/截图2_M6_F3_KosmicKrisp.jpg`）；该 KK 后端由 HMCL 提供开启入口，需先经包管理器安装 KK 才显示并允许切换 | https://github.com/Glavo 、https://glavo.site/about/ ；画面版权归各自权利人 |
+| HMCL 维护者 [Glavo](https://github.com/Glavo) 提供的 F3 截图 | 确认实际驱动名、机型与画面状态（`evidence/screenshot_M6_F3_KosmicKrisp.jpg`）；该 KK 后端由 HMCL 提供开启入口，需先经包管理器安装 KK 才显示并允许切换 | https://github.com/Glavo 、https://glavo.site/about/ ；画面版权归各自权利人 |
 
 两点容易搞混，写清楚：
 
@@ -43,12 +43,12 @@
 |---|---|---|
 | GitLab !44786 整页存档（`.mht`，含站点样式、头像、界面文案） | 上面的 MR 链接，自行保存页面 | 整页再分发会连站点界面、图标、头像一起带出去 |
 | 该页抽出的 647 行纯文本 | 同上 | 同上，避免整页文本的复制件 |
-| `renderpearl` 反汇编全文（2457 行）及切行版 | 按 `证据/如何自行复现反汇编.md` 自行生成 | 游戏客户端专有字节码的派生内容，不随公开包分发 |
+| `renderpearl` 反汇编全文（2457 行）及切行版 | 按 `evidence/how_to_reproduce_disassembly_zh.md` 自行生成 | 游戏客户端专有字节码的派生内容，不随公开包分发 |
 | 早期反编译结论稿 | 不需要了，修正后的结论已并入正文与附录 E.2 | 原稿含字节码片段和本机路径，且有几条判断后来被证伪 |
 
-**反汇编那部分请留意**：`证据/如何自行复现反汇编.md` 给的是方法，不是产物。生成和使用这类产物前，请自行确认符合游戏 EULA 与适用法律；本包不提供、也不鼓励分发任何客户端字节码或其反汇编文本。
+**反汇编那部分请留意**：`evidence/how_to_reproduce_disassembly_zh.md` 给的是方法，不是产物。生成和使用这类产物前，请自行确认符合游戏 EULA 与适用法律；本包不提供、也不鼓励分发任何客户端字节码或其反汇编文本。
 
-**F3 截图随包**（`证据/截图2_M6_F3_KosmicKrisp.jpg`），并在正文内联。文字转录另存一份便于检索。转发时请连这张图一起保留出处与本节说明；若提供者提出异议，按下一节渠道撤下，届时改用 `证据/F3_文字转录.md`。
+**F3 截图随包**（`evidence/screenshot_M6_F3_KosmicKrisp.jpg`），并在正文内联。文字转录另存一份便于检索。转发时请连这张图一起保留出处与本节说明；若提供者提出异议，按下一节渠道撤下，届时改用 `evidence/F3_transcript_zh.md`。
 
 ## 想改、想撤、想纠错
 

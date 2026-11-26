@@ -10,7 +10,7 @@ I'm publishing it to find three kinds of people: anyone with an Apple Silicon ma
 
 Bottom line: the chain works, but current release builds are not an out-of-the-box feature. What blocks it is two capabilities that haven't reached the SDK yet, not the architecture.
 
-The text and my own analysis are released under **CC BY 4.0**: repost, split, rewrite, just credit the source. Third-party material is used only for factual citation and links and remains with its respective authors; what is and isn't bundled, and why, is in `CREDITS_AND_LICENSE_EN.md`. The Chinese version is `macOS上跑Zink和KosmicKrisp_工程笔记.md`.
+The text and my own analysis are released under **CC BY 4.0**: repost, split, rewrite, just credit the source. Third-party material is used only for factual citation and links and remains with its respective authors; what is and isn't bundled, and why, is in `CREDITS_AND_LICENSE_en.md`. The Chinese version is `Zink_KosmicKrisp_on_macOS_zh.md`.
 
 ---
 
@@ -110,13 +110,13 @@ Merged 29 October, 26.3.1 released 18 November — looks like it made the cut, b
 
 The community F3 screenshot reads `Vulkan 1.4.363 KosmicKrisp` / `Mesa 26.3.1`. The two numbers live on different lines — one is the SDK/API version, the other the Mesa branch version — and neither implies the other's capabilities. That machine has no GS.
 
-![F3 on an M6: top right reads Vulkan 1.4.363 KosmicKrisp Mesa 26.3.1](证据/截图2_M6_F3_KosmicKrisp.jpg)
+![F3 on an M6: top right reads Vulkan 1.4.363 KosmicKrisp Mesa 26.3.1](evidence/screenshot_M6_F3_KosmicKrisp.jpg)
 
 The screenshot was provided by [Glavo](https://github.com/Glavo), maintainer of HMCL. The KosmicKrisp backend shown here is exposed by HMCL: the option is hidden by default, and HMCL only displays it and allows switching once KosmicKrisp has been installed on the system through a package manager. So this is not "install macOS and it just works", nor is it MC's own default backend.
 
-Also readable: `Minecraft 26.3 (26.3/vanilla)`, `Java: 25.0.5.0.3`, `12x Apple M6`, `Apple M6 (iGPU)`. The small text is transcribed in `证据/F3_transcript_EN.md` for searchability. The `119 fps T: 120 (fifo)` on the left cannot be used as proof of "no fallback" — OpenGL runs at that rate too; the driver name on the right is what settles it.
+Also readable: `Minecraft 26.3 (26.3/vanilla)`, `Java: 25.0.5.0.3`, `12x Apple M6`, `Apple M6 (iGPU)`. The small text is transcribed in `evidence/F3_transcript_en.md` for searchability. The `119 fps T: 120 (fifo)` on the left cannot be used as proof of "no fallback" — OpenGL runs at that rate too; the driver name on the right is what settles it.
 
-Scope of use and takedown for the image: `CREDITS_AND_LICENSE_EN.md`.
+Scope of use and takedown for the image: `CREDITS_AND_LICENSE_en.md`.
 
 Keep three build variants and always say which one a capability claim refers to:
 
@@ -284,32 +284,32 @@ Strip usernames, absolute paths and any account info from logs before sending. S
 
 ## Appendix D · What's in this package
 
-The public release contains one F3 screenshot for the driver name, short citations, a transcript and original writing — no full-page archives, proprietary bytecode products or copied passages. The second table says where the originals live if you want to check them. The image is inlined with a relative path in "Version bookkeeping"; it renders when this file and `证据/` sit side by side. The evidence directory keeps its Chinese name so both language versions share one set of files.
+The public release contains one F3 screenshot for the driver name, short citations, a transcript and original writing — no full-page archives, proprietary bytecode products or copied passages. The second table says where the originals live if you want to check them. The image is inlined with a relative path in "Version bookkeeping"; it renders when this file and `evidence/` sit side by side. The evidence directory keeps its Chinese name so both language versions share one set of files.
 
 **Bundled**
 
 | File | Contents |
 |---|---|
-| `CREDITS_AND_LICENSE_EN.md` | licence for the text, third-party attributions, image scope, how to obtain non-bundled material, takedown channel |
-| `证据/截图2_M6_F3_KosmicKrisp.jpg` | F3 screenshot on an M6, provided by [Glavo](https://github.com/Glavo), HMCL maintainer; confirms driver name and hardware, inlined above. The KK backend is exposed by HMCL and only shown / switchable once KK is installed through a package manager |
-| `证据/F3_transcript_EN.md` | text transcript of the same lines, for search and copy |
-| `证据/MR44786_public_quotes_EN.md` | shortest necessary quotes from the public MR page, each attributed |
-| `证据/How_to_reproduce_disassembly_EN.md` | method and commands to generate the `renderpearl` disassembly; contains no output |
+| `CREDITS_AND_LICENSE_en.md` | licence for the text, third-party attributions, image scope, how to obtain non-bundled material, takedown channel |
+| `evidence/screenshot_M6_F3_KosmicKrisp.jpg` | F3 screenshot on an M6, provided by [Glavo](https://github.com/Glavo), HMCL maintainer; confirms driver name and hardware, inlined above. The KK backend is exposed by HMCL and only shown / switchable once KK is installed through a package manager |
+| `evidence/F3_transcript_en.md` | text transcript of the same lines, for search and copy |
+| `evidence/MR44786_public_quotes_en.md` | shortest necessary quotes from the public MR page, each attributed |
+| `evidence/how_to_reproduce_disassembly_en.md` | method and commands to generate the `renderpearl` disassembly; contains no output |
 
 **Not bundled (and why)**
 
 | Original | Where / how to get it | Why not |
 |---|---|---|
-| Full-page GitLab !44786 archive (`.mht`, with site CSS, avatars, UI text) | https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/44786 | Redistributing a whole page drags the site chrome and third-party assets along; the necessary facts are short-quoted in `MR44786_public_quotes_EN.md` |
+| Full-page GitLab !44786 archive (`.mht`, with site CSS, avatars, UI text) | https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/44786 | Redistributing a whole page drags the site chrome and third-party assets along; the necessary facts are short-quoted in `MR44786_public_quotes_en.md` |
 | 647-line plain-text extract of that page | same link, or save the page yourself | same reason; avoid a full-text copy |
-| `renderpearl` disassembly (2457 lines) and its excerpt | generate yourself via `证据/How_to_reproduce_disassembly_EN.md` | derivative of proprietary game-client bytecode, not shipped; the text keeps conclusions and reproduction steps only |
+| `renderpearl` disassembly (2457 lines) and its excerpt | generate yourself via `evidence/how_to_reproduce_disassembly_en.md` | derivative of proprietary game-client bytecode, not shipped; the text keeps conclusions and reproduction steps only |
 | Earlier disassembly conclusion draft | not needed; corrected conclusions are in the main text and E.2 | it contained bytecode fragments and local paths, and several judgements were later disproved |
 
 The quotes in Appendix E come from the public pages above; the main text paraphrases community results as facts and numbers only, without copying passages.
 
 ## Appendix E · Short public quotes and conclusions
 
-Only the shortest necessary quotes from public pages; text remains with its respective speakers, full context at `https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/44786`. No disassembly output is pasted here; E.2 lists conclusions only, with reproduction steps in `证据/How_to_reproduce_disassembly_EN.md`.
+Only the shortest necessary quotes from public pages; text remains with its respective speakers, full context at `https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/44786`. No disassembly output is pasted here; E.2 lists conclusions only, with reproduction steps in `evidence/how_to_reproduce_disassembly_en.md`.
 
 ### E.1 Mesa !44786
 
@@ -373,7 +373,7 @@ Mary Guillemard: Working fine on HK and fixing
 
 ### E.2 Disassembly conclusions (no bytecode)
 
-The points in "The chain, and two integration traps" come from static analysis of game-client classes. The output is a derivative of proprietary bytecode and isn't shipped; generate it yourself via `证据/How_to_reproduce_disassembly_EN.md`. Conclusions only, for cross-checking:
+The points in "The chain, and two integration traps" come from static analysis of game-client classes. The output is a derivative of proprietary bytecode and isn't shipped; generate it yourself via `evidence/how_to_reproduce_disassembly_en.md`. Conclusions only, for cross-checking:
 
 - `VulkanBackend.loadLibrary()` passes `SharedLibrary.getPath()` (a runtime path, not a literal), then compares two `vkGetInstanceProcAddr` addresses and throws `BackendCreationException` plus unload if they differ.
 - `VulkanBackend.createDevice()` enumerates the extensions the driver actually exposes, then runs `isSupported` over the required / requiredIfAvailable / optional groups, adding and logging `Enabling ... FeatureSet` only on success.
@@ -387,7 +387,7 @@ Class names, method names and string constants are factual descriptions; no byte
 
 ## Sources
 
-First-hand records preferred, links where available. This document only cites facts and indexes pages; it copies no passages or full-page archives. Scope, licence and takedown: `CREDITS_AND_LICENSE_EN.md`.
+First-hand records preferred, links where available. This document only cites facts and indexes pages; it copies no passages or full-page archives. Scope, licence and takedown: `CREDITS_AND_LICENSE_en.md`.
 
 **Drivers and official**
 - `VP_ZINK_requirements.json` / https://docs.mesa3d.org/drivers/zink.html ; Mesa !36061 https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/36061
@@ -410,5 +410,5 @@ First-hand records preferred, links where available. This document only cites fa
 - GitHub #1206 "Let a macOS run pick KosmicKrisp or MoltenVK"
 
 **Local output**
-- Conclusions of the `renderpearl` static analysis (folded into the main text and E.2); bytecode output not shipped, generation method in `证据/How_to_reproduce_disassembly_EN.md`
-- F3 screenshot provided by [Glavo](https://github.com/Glavo), HMCL maintainer (`Vulkan 1.4.363 KosmicKrisp` / `Mesa 26.3.1`); both the image and the transcript are bundled. The backend is exposed by HMCL and only shown / switchable once KK has been installed through a package manager. Image scope: `CREDITS_AND_LICENSE_EN.md`
+- Conclusions of the `renderpearl` static analysis (folded into the main text and E.2); bytecode output not shipped, generation method in `evidence/how_to_reproduce_disassembly_en.md`
+- F3 screenshot provided by [Glavo](https://github.com/Glavo), HMCL maintainer (`Vulkan 1.4.363 KosmicKrisp` / `Mesa 26.3.1`); both the image and the transcript are bundled. The backend is exposed by HMCL and only shown / switchable once KK has been installed through a package manager. Image scope: `CREDITS_AND_LICENSE_en.md`

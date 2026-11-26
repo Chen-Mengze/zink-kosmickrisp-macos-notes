@@ -55,4 +55,4 @@ javap -c -p -classpath classes com.mojang.renderpearl.backend.vulkan.VulkanInsta
 
 ---
 
-许可与引用范围见根目录 `版权与引用说明.md`。
+许可与引用范围见根目录 `CREDITS_AND_LICENSE_zh.md`。

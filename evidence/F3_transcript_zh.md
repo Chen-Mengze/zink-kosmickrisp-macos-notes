@@ -2,7 +2,7 @@
 
 HMCL 维护者 [Glavo](https://github.com/Glavo) 在一台 Apple Silicon Mac 上提供的 F3 画面。原图随包，见 `截图2_M6_F3_KosmicKrisp.jpg`；这里另存一份逐字转录，便于检索和复制，不含任何个人标识、路径或账号信息。
 
-这里显示的 KosmicKrisp 后端由 HMCL 提供开启入口：选项默认隐藏，只有在系统里通过包管理器装好 KK 之后才会显示并允许切换启用。图片使用范围见根目录 `版权与引用说明.md`。
+这里显示的 KosmicKrisp 后端由 HMCL 提供开启入口：选项默认隐藏，只有在系统里通过包管理器装好 KK 之后才会显示并允许切换启用。图片使用范围见根目录 `CREDITS_AND_LICENSE_zh.md`。
 
 ```text
 Vulkan 1.4.363 KosmicKrisp   /   Mesa 26.3.1

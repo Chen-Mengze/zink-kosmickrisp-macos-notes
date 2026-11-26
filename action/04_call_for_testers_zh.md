@@ -25,7 +25,7 @@
 ## 需要你做什么
 
 1. 一台 Apple Silicon Mac，macOS 26 或 27，能装 Xcode 命令行工具
-2. 照着这份协议跑一遍：`02_真机测试协议.md`（40 分钟，复制命令，不需要写代码）
+2. 照着这份协议跑一遍：`02_test_protocol_zh.md`（40 分钟，复制命令，不需要写代码）
 3. 把 `vulkaninfo` 的 JSON、算出来的 GL 版本、missing 列表贴到 MR 或仓库 issue
 
 **核心步骤不需要启动游戏。** 工具直接从驱动能力表算出 GL 天花板，跑不跑 MC 都行。
@@ -52,7 +52,7 @@
 
 ## 怎么参与
 
-- 协议：`02_真机测试协议.md`
+- 协议：`02_test_protocol_zh.md`
 - 仓库：https://github.com/Chen-Mengze/zink-kosmickrisp-macos-notes
 - 直接开 issue 贴结果，或者在 MR !44928 下回帖
 - 光影作者另有一件事：告诉我你的 pack 里 GS 是**硬依赖**（真的有 geometry stage）还是**软依赖**（只在高级特效里用、有替代分支）。这一条决定这条路值不值得继续投人。

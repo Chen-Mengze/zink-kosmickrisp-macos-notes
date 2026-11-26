@@ -4,10 +4,10 @@ For anyone reposting, quoting, or pulling this material into their own project. 
 
 ## What we wrote ourselves
 
-- `Zink_KosmicKrisp_on_macOS_EN.md` (the English text, including the analysis conclusions folded into Appendix E.2)
-- the arrangement and annotations in `证据/MR44786_public_quotes_EN.md`
-- `证据/F3_transcript_EN.md` and `证据/How_to_reproduce_disassembly_EN.md`
-- the Chinese counterparts: `macOS上跑Zink和KosmicKrisp_工程笔记.md`, `版权与引用说明.md`, and the Chinese evidence files
+- `Zink_KosmicKrisp_on_macOS_en.md` (the English text, including the analysis conclusions folded into Appendix E.2)
+- the arrangement and annotations in `evidence/MR44786_public_quotes_en.md`
+- `evidence/F3_transcript_en.md` and `evidence/how_to_reproduce_disassembly_en.md`
+- the Chinese counterparts: `Zink_KosmicKrisp_on_macOS_zh.md`, `CREDITS_AND_LICENSE_zh.md`, and the Chinese evidence files
 
 All of the above are released under **CC BY 4.0**: repost, split, rewrite, use in docs or a wiki, just credit the source. Use the author name shown at the place of publication for attribution.
 
@@ -27,7 +27,7 @@ Technical facts, version dates, CTS counts, patch numbers, commit titles and sho
 | GitHub Gist *Running Minecraft on macOS with Zink + KosmicKrisp* | conclusions of the nine debug problems, 70fps, 2–3% | see the Gist itself; the text paraphrases facts only |
 | Hadron `findings.md` / conformance records, Playport 0087 / 0093 | 0038–0083 numbering and conclusions, CTS counts, fans/quads result | each project's repo; the text paraphrases facts only |
 | `pauyedin/kosmickrisp-minecraft-macos`, steamac | cache-key scheme, 0001–0003/0021, 63 patches | https://gitlab.com/pauyedin/kosmickrisp-minecraft-macos/-/tree/main and others |
-| F3 screenshot provided by [Glavo](https://github.com/Glavo), HMCL maintainer | confirms the actual driver name, machine and picture state (`证据/截图2_M6_F3_KosmicKrisp.jpg`); the KK backend is exposed by HMCL and only shown / switchable once KK has been installed through a package manager | https://github.com/Glavo , https://glavo.site/about/ ; the image copyright stays with its respective rights holders |
+| F3 screenshot provided by [Glavo](https://github.com/Glavo), HMCL maintainer | confirms the actual driver name, machine and picture state (`evidence/screenshot_M6_F3_KosmicKrisp.jpg`); the KK backend is exposed by HMCL and only shown / switchable once KK has been installed through a package manager | https://github.com/Glavo , https://glavo.site/about/ ; the image copyright stays with its respective rights holders |
 
 Two things that are easy to get wrong:
 
@@ -44,12 +44,12 @@ The public release deliberately omits the following, because they are copies of 
 |---|---|---|
 | Full-page GitLab !44786 archive (`.mht`, with site CSS, avatars, UI text) | save the page yourself from the MR link above | redistributing a whole page drags the site chrome, icons and avatars along |
 | 647-line plain-text extract of that page | same | same; avoid a full-text copy |
-| `renderpearl` disassembly (2457 lines) and its excerpt | generate via `证据/How_to_reproduce_disassembly_EN.md` | derivative of proprietary game-client bytecode, not shipped |
+| `renderpearl` disassembly (2457 lines) and its excerpt | generate via `evidence/how_to_reproduce_disassembly_en.md` | derivative of proprietary game-client bytecode, not shipped |
 | Earlier disassembly conclusion draft | not needed; corrected conclusions are in the main text and Appendix E.2 | it contained bytecode fragments and local paths, and several judgements were later disproved |
 
-**On the disassembly**: `证据/How_to_reproduce_disassembly_EN.md` gives a method, not an artefact. Before generating or using such output, satisfy yourself that it complies with the game EULA and applicable law. This package neither provides nor encourages distributing client bytecode or its disassembly.
+**On the disassembly**: `evidence/how_to_reproduce_disassembly_en.md` gives a method, not an artefact. Before generating or using such output, satisfy yourself that it complies with the game EULA and applicable law. This package neither provides nor encourages distributing client bytecode or its disassembly.
 
-**The F3 screenshot is bundled** (`证据/截图2_M6_F3_KosmicKrisp.jpg`) and inlined in the text. A separate transcript is provided for searchability. When reposting, keep the image together with its attribution and this notice; if the provider raises an objection, take it down via the channel below and fall back to `证据/F3_transcript_EN.md` (or `证据/F3_文字转录.md` for the Chinese version).
+**The F3 screenshot is bundled** (`evidence/screenshot_M6_F3_KosmicKrisp.jpg`) and inlined in the text. A separate transcript is provided for searchability. When reposting, keep the image together with its attribution and this notice; if the provider raises an objection, take it down via the channel below and fall back to `evidence/F3_transcript_en.md` (or `evidence/F3_transcript_zh.md` for the Chinese version).
 
 ## Corrections, takedowns, reuse
 

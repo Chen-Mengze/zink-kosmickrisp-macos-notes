@@ -18,4 +18,4 @@ How to read it:
 
 The KosmicKrisp backend shown here is exposed by HMCL: the option is hidden by default, and HMCL only displays it and allows switching once KosmicKrisp has been installed on the system through a package manager.
 
-For the original image, see `截图2_M6_F3_KosmicKrisp.jpg` in this directory. Image scope and takedown: `../CREDITS_AND_LICENSE_EN.md`.
+For the original image, see `截图2_M6_F3_KosmicKrisp.jpg` in this directory. Image scope and takedown: `../CREDITS_AND_LICENSE_en.md`.

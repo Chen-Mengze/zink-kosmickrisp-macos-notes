@@ -55,4 +55,4 @@ Leave `classes/` and the disassembly on your machine. Write conclusions as "whic
 
 ---
 
-Licence and citation scope: `../CREDITS_AND_LICENSE_EN.md`.
+Licence and citation scope: `../CREDITS_AND_LICENSE_en.md`.

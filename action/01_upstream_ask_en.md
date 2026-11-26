@@ -25,4 +25,4 @@ There is also a concrete anomaly worth ten minutes on its own: a stock SDK build
 Comment on !44928, or open an issue at
 https://github.com/Chen-Mengze/zink-kosmickrisp-macos-notes
 
-Protocol and report template: `03_真机测试协议_EN.md` in this folder.
+Protocol and report template: `03_test_protocol_en.md` in this folder.

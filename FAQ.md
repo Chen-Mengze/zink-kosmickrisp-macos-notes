@@ -75,7 +75,7 @@ GS 已合（Junmin Lee，!44786），XFB 是 draft（Willie Abrams，!44928）�
 
 1. **10 分钟**：在现成 SDK 上跑一次检查工具，回答「A 为什么报 3.1」（协议第 0.5 节）。
 2. **40 分钟**：完整跑一遍构建 B，交一份 `vulkaninfo` + 差集（协议正文）。
-3. **不定时**：如果你写光影，告诉我你的 pack 里 GS 是硬依赖还是软依赖（`工具/packscan.py` 能先给个初判）。
+3. **不定时**：如果你写光影，告诉我你的 pack 里 GS 是硬依赖还是软依赖（`tools/packscan.py` 能先给个初判）。
 
 ## 10. Minecraft 26.2 之后默认是 Vulkan 吗？
 

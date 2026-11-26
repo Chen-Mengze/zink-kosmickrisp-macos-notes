@@ -1,12 +1,12 @@
-name: 真机记录
-description: 提交一份 KosmicKrisp + Zink 的真机能力记录（10 分钟或 40 分钟两档都收）
+name: "真机记录 / Device report"
+description: "提交一份 KosmicKrisp + Zink 的真机能力记录（10 分钟或 40 分钟两档都收） / Submit a real-machine capability record (either track)"
 title: "[记录] <芯片> / macOS <版本> / 构建 <A|B|C>"
 labels: ["data"]
 body:
   - type: markdown
     attributes:
       value: |
-        提交前先看 `行动/02_真机测试协议.md`。10 分钟档只需要 SDK 和 `-Dtools=zink`，不用编 KK。
+        提交前先看 `action/02_test_protocol_zh.md`。10 分钟档只需要 SDK 和 `-Dtools=zink`，不用编 KK。
         **确认 `driverName` 是 `KosmicKrisp`**：是 `Apple` 就说明静默降级了，这条记录无效。
 
   - type: input
