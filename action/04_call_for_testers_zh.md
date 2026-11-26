@@ -1,4 +1,4 @@
-# 招募：1–2 小时，帮 macOS 的 OpenGL 从 4.1 往上推
+# 招募：1–2 小时，给 macOS 的 OpenGL 链补一份 3.3 的真机数据
 
 ## 一句话
 
@@ -26,10 +26,12 @@
 ## 需要你做什么
 
 1. 一台 Apple Silicon Mac，macOS 26 或 27，能装 Xcode 命令行工具
-2. 照着这份协议跑一遍：`02_test_protocol_zh.md`（1–2 小时，复制命令，不需要写代码）
-3. 把 `vulkaninfo` 的 JSON、算出来的 GL 版本、missing 列表贴到 MR 或仓库 issue
+2. 照着这份协议跑一遍：`02_test_protocol_zh.md`（1–2 小时；检查工具要从零编再加 20–40 分钟。复制命令，不需要写代码）
+3. 把 `vulkaninfo` 的 JSON、checker 的逐档输出、`git log --oneline -3` 贴到 MR 或仓库 issue（有驱动名截图就一起附）
 
 **核心步骤不需要启动游戏。** 工具从驱动能力表算出的是保守上限；实际 GL 版本最后另跑一次应用确认，跑不跑 MC 都行。
+
+所以核心路径交上来的是**逐档 Supported / UNSUPPORTED**，不是应用里那个版本号；checker 也不打印缺项表，要的话用 `tools/kkcap.py diff` 或拿 `VP_ZINK_requirements.json` 自己对。**这一轮只判 3.3**：`gl33` Supported、`VK_EXT_transform_feedback` 在、驱动名对得上，三条满足就算测成；三条都不成立也照样是数据。判据在 `action/05_acceptance_criteria_zh.md` 第五节。
 
 ## 优先要哪几台
 

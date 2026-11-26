@@ -2,7 +2,7 @@
 
 目标只有一个：**在 Mesa main + !44928 上，Zink 到底能报到 GL 几？卡在哪一项？**
 
-完整档约 1–2 小时（首次编 KK 偏上限），不需要图形开发经验，会复制命令就行。
+完整档约 1–2 小时（首次编 KK 偏上限）；若检查工具也要从零编，另加 20–40 分钟。不需要图形开发经验，会复制命令就行。
 核心步骤**不需要启动任何游戏或应用**——`zink_check_requirements` 直接问当前 Vulkan 设备，逐档打 `Supported` / `UNSUPPORTED`。它给的是**保守上限**：3.0 以上按硬门槛，2.1 档的软要求（stock KK 的 `VK_EXT_custom_border_color` 藏在 `MESA_KK_EXPERIMENTAL=custom_border` 后面）可能让 `gl21` 报 UNSUPPORTED，但 Zink 实际仍可能报 2.1。要确认实际 GL 版本，最后跑一次 GL 应用或 `glxinfo`。
 
 ---

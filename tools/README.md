@@ -46,7 +46,7 @@ python kkcap.py selftest
 
 | 结果 | 含义 |
 |---|---|
-| `HARD` | 存在独立 geometry stage 文件（`.gsh` / `.geom`）。通常意味着 pack 把 GS 当独立 stage 用，Iris/OptiFine 会尝试编译；`#if 0` 或宏保护要另看（见「局限」） |
+| `HARD` | 存在独立 geometry stage 文件（`.gsh` / `.geom`）。通常意味着 pack 把 GS 当独立 stage 用，Iris/OptiFine 会尝试编译；但 `shaders.properties` 里的条件开关不解析，被条件关掉的 stage 同样算 HARD，`#if 0` 或宏保护也要另看（见「局限」）。**HARD 只表示「值得人工确认」，不表示「一定参与编译」。** |
 | `SOFT` | GS 内建只出现在 `#ifdef` 之类的预处理块里，且没有独立 stage 文件 |
 | `SUSPECT` | 非 stage 文件里出现未加保护的 GS 内建，写法需要作者确认 |
 | `NONE` | 没发现 GS |
@@ -65,7 +65,7 @@ python packscan.py packs/*/            # 批量
 
 ### 局限
 
-- 是**静态启发式**，不是编译器。宏展开、include 链、`shaders.properties` 里的条件都不解析。
+- 是**静态启发式**，不是编译器。宏展开、include 链、`shaders.properties` 里的条件都不解析；所以「Iris 会尝试编译」这句话在扫描器这里是**不成立的推断**，HARD 结果只能当人工复核的入口。
 - `HARD` 的判据是「文件存在且含 `void main`」。如果某个 pack 用 `.gsh` 但内容被整体 `#if 0` 包住，会误判——这种情况 `gs stage 1 file(s)` 后面会同时列出 guarded 命中，肉眼能看出来。
 - XFB 只报「有没有引用」，不判断是否真的启用。
 

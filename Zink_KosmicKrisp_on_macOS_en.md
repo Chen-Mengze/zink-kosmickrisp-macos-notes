@@ -279,7 +279,7 @@ VK_DRIVER_FILES=/path/to/kk_icd.json                     # then point at KK
 ```
 Environment
   Machine / macOS:
-  Build ID:         A (SDK x.y.z) / B (main, commit=____) / C (patched, internal only)
+  Build ID:         A (SDK x.y.z) / B (main, commit=____) / B+ (B + !44928, head=____) / C (Hadron 0038–0083, not upstreamed; write "unavailable" if you cannot build it)
   App & workload:   name + version + GL backend setting
   Injection:        generic bundle / LWJGL-class; libname=____ ; VK_DRIVER_FILES=____
 
@@ -298,7 +298,7 @@ Four columns (per sample)
   Voxy / DH-class mod
   non-game GL app
 
-Performance (second track, optional)
+Performance (second track, optional; a baseline exists only for samples Apple GL 4.1 can also run — record absolute numbers for 4.3+-only samples)
   Apple GL 4.1 baseline: avg fps / 1% low / stutter spikes / shader warm-up / VRAM
   Zink+KK:               same
 

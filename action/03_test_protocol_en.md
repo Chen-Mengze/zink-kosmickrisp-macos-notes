@@ -2,7 +2,7 @@
 
 Goal: **on Mesa main + !44928, what GL version does Zink actually report on KosmicKrisp, and what is missing?**
 
-About 1–2 hours for the full track (a cold KK build is closer to two). No graphics development experience required.
+About 1–2 hours for the full track (a cold KK build is closer to two), plus 20–40 minutes if the checker also has to be built from scratch. No graphics development experience required.
 The core steps do **not** launch a game or any GL application — `zink_check_requirements` queries the current Vulkan device and prints `Supported` / `UNSUPPORTED` per tier. That is a **conservative ceiling**: 3.0 and above follow hard gates, while 2.1 soft requirements (stock KK hides `VK_EXT_custom_border_color` behind `MESA_KK_EXPERIMENTAL=custom_border`) can make `gl21` report UNSUPPORTED even though Zink still reports 2.1. To confirm the actual GL version, run one GL app or `glxinfo` at the end.
 
 ---

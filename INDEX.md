@@ -27,7 +27,7 @@
 | `action/02_test_protocol_zh.md` | 中文，轻量 10 分钟 / 完整 1–2 小时两档 |
 | `action/03_test_protocol_en.md` | 英文同上 |
 | `action/04_call_for_testers_zh.md` | 中文发帖正文 |
-| `action/05_acceptance_criteria_zh.md` | 四列判据、性能第二轨、口径铁律、成立/停止条件 |
+| `action/05_acceptance_criteria_zh.md` | 四列判据、性能第二轨、口径铁律、本轮（B+）判据、终局判据、停止条件 |
 | `action/06_hmcl_integration_zh.md` | HMCL 里 KosmicKrisp / Zink 的确切代码位置、检测条件、缺口与改动点 |
 | `tools/kkcap.py` | `vulkaninfo --json` → 记录行 / 矩阵 / diff |
 | `tools/packscan.py` | 光影包 → HARD / SOFT / SUSPECT / NONE |

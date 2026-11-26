@@ -279,7 +279,7 @@ VK_DRIVER_FILES=/path/to/kk_icd.json                     # 再指向 KK
 ```
 环境
   机型 / macOS:
-  构建标识:        A(SDK x.y.z) / B(main, commit=____) / C(补丁态, 仅内部)
+  构建标识:        A(SDK x.y.z) / B(main, commit=____) / B+(B + !44928, head=____) / C(Hadron 0038–0083, 未上游；编不出来就写「不可得」)
   应用与负载:      名称 + 版本 + GL 后端设定
   注入方式:        通用 bundle / LWJGL 类; libname=____ ; VK_DRIVER_FILES=____
 
@@ -298,7 +298,7 @@ VK_DRIVER_FILES=/path/to/kk_icd.json                     # 再指向 KK
   Voxy / DH 类模组
   非游戏 GL 应用
 
-性能（第二轨，可选）
+性能（第二轨，可选；只有苹果 GL 4.1 也跑得动的样本有基线，4.3+ 专属样本记绝对值）
   苹果 GL 4.1 基线: 平均帧 / 1% low / 卡顿尖峰 / shader 预热 / 显存
   Zink+KK:          同上
 
